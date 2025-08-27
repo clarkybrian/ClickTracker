@@ -7,6 +7,7 @@ import { AuthPage } from './pages/AuthPage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import { PricingPage } from './pages/PricingPage';
 import { ContactPage } from './pages/ContactPage';
+import { ShortenPage } from './pages/ShortenPage';
 import { useAuth } from './hooks/useAuth';
 
 // Protected Route Component
@@ -46,6 +47,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
+          <Route path="shorten" element={<ShortenPage />} />
           <Route path="features" element={<FeaturesPage />} />
           <Route path="pricing" element={<PricingPage />} />
           <Route path="contact" element={<ContactPage />} />

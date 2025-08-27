@@ -40,6 +40,19 @@ export const Header: React.FC = () => {
             </NavLink>
             
             <NavLink
+              to="/shorten"
+              className={({ isActive }) =>
+                `font-semibold px-4 py-2 rounded-lg transition-all duration-300 ${
+                  isActive
+                    ? 'bg-blue-100 text-blue-600'
+                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-100'
+                }`
+              }
+            >
+              Raccourcir
+            </NavLink>
+            
+            <NavLink
               to="/features"
               className={({ isActive }) =>
                 `font-semibold px-4 py-2 rounded-lg transition-all duration-300 ${
