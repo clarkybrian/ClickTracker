@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, BarChart3, Globe, Zap, TrendingUp, Crown, Check } from 'lucide-react';
+import { ClickDemo } from '../components/Demo/ClickDemo';
 
 // Stats qui défilent
 const statsCarousel = [
@@ -54,9 +55,14 @@ const plans = [
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [currentStat, setCurrentStat] = useState(0);
+  const [showDemo, setShowDemo] = useState(false);
 
   const handleGetStarted = () => {
     navigate('/shorten');
+  };
+
+  const handleShowDemo = () => {
+    setShowDemo(true);
   };
 
   // Animation des stats
@@ -269,11 +275,17 @@ export const HomePage: React.FC = () => {
               <span>Commencer gratuitement</span>
               <ArrowRight className="h-5 w-5" />
             </button>
-            <button className="text-blue-600 px-8 py-4 rounded-2xl font-medium text-lg hover:bg-gray-50 transition-all duration-300">
+            <button 
+              onClick={handleShowDemo}
+              className="text-blue-600 px-8 py-4 rounded-2xl font-medium text-lg hover:bg-gray-50 transition-all duration-300"
+            >
               Voir une démo
             </button>
           </div>
         </div>
+
+        {/* Demo Modal */}
+        <ClickDemo isOpen={showDemo} onClose={() => setShowDemo(false)} />
       </section>
 
       {/* Zone 2: Features avec carrousel */}
