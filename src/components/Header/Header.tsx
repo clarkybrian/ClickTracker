@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, User, LogOut, Crown, Menu, X } from 'lucide-react';
+import { Link, User, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { NavLink, useNavigate } from 'react-router-dom';
 
@@ -106,10 +106,6 @@ export const Header: React.FC = () => {
             <div className="ck-actions hidden md:flex items-center space-x-4">
               {user ? (
                 <>
-                  <div className="ck-premium-badge flex items-center space-x-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full">
-                    <Crown className="w-4 h-4" />
-                    <span className="text-sm font-bold">Premium</span>
-                  </div>
                   <div className="ck-user-info flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-lg">
                     <User className="w-4 h-4 text-gray-600" />
                     <span className="text-sm text-gray-700 font-medium">{user.email?.split('@')[0]}</span>
@@ -139,10 +135,7 @@ export const Header: React.FC = () => {
             <div className="ck-mobile-actions md:hidden flex items-center space-x-3">
               {user ? (
                 <div className="ck-mobile-user flex items-center space-x-2">
-                  <div className="ck-premium-badge-mobile flex items-center space-x-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-1 rounded-full">
-                    <Crown className="w-3 h-3" />
-                    <span className="text-xs font-bold">Premium</span>
-                  </div>
+                  <User className="w-4 h-4 text-gray-600" />
                 </div>
               ) : (
                 <NavLink

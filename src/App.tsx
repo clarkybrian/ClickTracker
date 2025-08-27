@@ -9,6 +9,7 @@ import { FeaturesPage } from './pages/FeaturesPage';
 import { PricingPage } from './pages/PricingPage';
 import { ContactPage } from './pages/ContactPage';
 import { ShortenPage } from './pages/ShortenPage';
+import { RedirectPage } from './pages/RedirectPage';
 import { useAuth } from './hooks/useAuth';
 
 // Protected Route Component
@@ -47,6 +48,9 @@ function App() {
     <Router>
       <ScrollToTop />
       <Routes>
+        {/* Route de redirection - sans layout */}
+        <Route path="/r/:shortCode" element={<RedirectPage />} />
+        
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="shorten" element={<ShortenPage />} />

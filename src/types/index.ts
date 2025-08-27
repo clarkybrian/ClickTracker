@@ -9,14 +9,19 @@ export interface User {
 
 export interface Link {
   id: string;
-  userId: string;
-  originalUrl: string;
-  shortCode: string;
-  customAlias?: string;
+  user_id: string;
+  original_url: string;
+  short_code: string;
+  full_short_url: string;
   title?: string;
-  totalClicks: number;
-  createdAt: string;
-  isActive: boolean;
+  description?: string;
+  total_clicks: number;
+  unique_clicks: number;
+  is_active: boolean;
+  is_private: boolean;
+  created_at: string;
+  updated_at: string;
+  last_clicked_at?: string;
 }
 
 export interface ClickEvent {

@@ -49,9 +49,9 @@ export const AuthPage: React.FC = () => {
           </div>
 
           <h1 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-            Rejoignez des milliers
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-              d'utilisateurs satisfaits
+            Connexion / Inscription
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-2xl lg:text-3xl mt-2">
+              Accédez à votre dashboard personnalisé
             </span>
           </h1>
 

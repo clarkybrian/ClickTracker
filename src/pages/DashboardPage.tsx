@@ -3,8 +3,181 @@ import { Dashboard } from '../components/Dashboard/Dashboard';
 
 export const DashboardPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-gray-50">
+      {/* Background avec vagues et formes géométriques */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Grille subtile */}
+        <div className="absolute inset-0 opacity-[0.125]">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.24) 1px, transparent 1px),
+                             linear-gradient(90deg, rgba(0,0,0,0.24) 1px, transparent 1px)`,
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+
+        {/* Vagues fluides */}
+        <div className="absolute top-0 left-0 w-[150%] h-32 opacity-[0.03]">
+          <div className="w-full h-full bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 animate-pulse" style={{
+            clipPath: 'polygon(0 0, 100% 0, 100% 70%, 80% 100%, 60% 80%, 40% 90%, 20% 70%, 0 85%)',
+            animationDuration: '8s'
+          }}></div>
+        </div>
+
+        <div className="absolute top-1/2 -translate-y-1/2 left-0 w-[160%] h-40 opacity-[0.04]">
+          <div className="w-full h-full bg-gradient-to-r from-green-400 via-teal-400 to-blue-400 animate-bounce" style={{
+            clipPath: 'polygon(0 30%, 20% 0, 40% 20%, 60% 10%, 80% 30%, 100% 15%, 100% 100%, 0 100%)',
+            animationDelay: '2s',
+            animationDuration: '12s'
+          }}></div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 w-[140%] h-36 opacity-[0.035]">
+          <div className="w-full h-full bg-gradient-to-r from-orange-400 via-pink-400 to-rose-400 animate-ping" style={{
+            clipPath: 'polygon(0 100%, 0 40%, 20% 20%, 40% 35%, 60% 15%, 80% 25%, 100% 10%, 100% 100%)',
+            animationDelay: '4s',
+            animationDuration: '10s'
+          }}></div>
+        </div>
+
+        {/* Vagues verticales */}
+        <div className="absolute top-0 left-0 w-24 h-[120%] opacity-[0.03]">
+          <div className="w-full h-full bg-gradient-to-b from-indigo-400 via-purple-400 to-pink-400 animate-spin" style={{
+            clipPath: 'polygon(0 0, 70% 0, 90% 20%, 100% 40%, 85% 60%, 95% 80%, 75% 100%, 0 100%)',
+            animationDelay: '1s',
+            animationDuration: '20s'
+          }}></div>
+        </div>
+
+        <div className="absolute top-0 right-0 w-28 h-[130%] opacity-[0.035]">
+          <div className="w-full h-full bg-gradient-to-b from-cyan-400 via-blue-400 to-indigo-400 animate-pulse" style={{
+            clipPath: 'polygon(100% 0, 30% 0, 10% 20%, 0 40%, 15% 60%, 5% 80%, 25% 100%, 100% 100%)',
+            animationDelay: '3s',
+            animationDuration: '14s'
+          }}></div>
+        </div>
+
+        {/* Formes géométriques dynamiques */}
+        <div className="absolute top-10 left-1/4 w-32 h-32 opacity-[0.075]">
+          <div className="w-full h-full bg-blue-400 rounded-full animate-pulse"></div>
+        </div>
+        
+        <div className="absolute top-1/3 right-1/4 w-24 h-24 opacity-[0.075]">
+          <div className="w-full h-full bg-purple-400 animate-bounce" style={{
+            clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'
+          }}></div>
+        </div>
+        
+        <div className="absolute bottom-1/4 left-1/6 w-20 h-20 opacity-[0.075]">
+          <div className="w-full h-full bg-green-400 animate-spin" style={{
+            clipPath: 'polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%)'
+          }}></div>
+        </div>
+        
+        <div className="absolute top-1/2 left-3/4 w-16 h-16 opacity-[0.075]">
+          <div className="w-full h-full bg-yellow-400 rounded-lg animate-ping"></div>
+        </div>
+
+        {/* Nouvelles formes avec animations variées */}
+        <div className="absolute top-16 right-1/3 w-14 h-14 opacity-[0.06]">
+          <div className="w-full h-full bg-orange-400 animate-pulse" style={{
+            clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+            animationDelay: '2s'
+          }}></div>
+        </div>
+
+        <div className="absolute bottom-1/3 right-1/12 w-18 h-18 opacity-[0.08]">
+          <div className="w-full h-full bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '3.5s' }}></div>
+        </div>
+
+        <div className="absolute top-2/3 left-1/12 w-12 h-12 opacity-[0.07]">
+          <div className="w-full h-full bg-cyan-400 animate-spin" style={{
+            clipPath: 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)',
+            animationDelay: '1s'
+          }}></div>
+        </div>
+
+        <div className="absolute top-1/6 left-1/2 w-10 h-10 opacity-[0.09]">
+          <div className="w-full h-full bg-teal-400 rounded-lg animate-ping transform rotate-45" style={{ animationDelay: '4s' }}></div>
+        </div>
+
+        {/* Formes géométriques avancées */}
+        <div className="absolute bottom-1/6 left-2/3 w-22 h-22 opacity-[0.065]">
+          <div className="w-full h-full bg-indigo-400 animate-spin" style={{
+            clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
+            animationDelay: '5s',
+            animationDuration: '15s'
+          }}></div>
+        </div>
+
+        <div className="absolute top-3/4 right-1/5 w-8 h-8 opacity-[0.09]">
+          <div className="w-full h-full bg-emerald-400 rounded-full animate-pulse" style={{ animationDelay: '2.8s' }}></div>
+        </div>
+
+        <div className="absolute top-1/8 left-1/8 w-16 h-16 opacity-[0.07]">
+          <div className="w-full h-full bg-rose-400 animate-bounce" style={{
+            clipPath: 'polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 0% 60%, 10% 20%)',
+            animationDelay: '3.2s'
+          }}></div>
+        </div>
+
+        <div className="absolute bottom-2/5 right-2/5 w-14 h-14 opacity-[0.08]">
+          <div className="w-full h-full bg-amber-400 animate-ping" style={{
+            clipPath: 'circle(50% at 50% 50%)',
+            animationDelay: '4.8s'
+          }}></div>
+        </div>
+
+        <div className="absolute top-4/5 left-1/5 w-11 h-11 opacity-[0.075]">
+          <div className="w-full h-full bg-lime-400 animate-spin transform rotate-30" style={{ animationDelay: '1.5s' }}></div>
+        </div>
+
+        <div className="absolute bottom-1/8 right-1/6 w-24 h-24 opacity-[0.06]">
+          <div className="w-full h-full bg-sky-400 animate-pulse" style={{
+            clipPath: 'polygon(0% 0%, 100% 0%, 100% 75%, 75% 75%, 75% 100%, 50% 75%, 0% 75%)',
+            animationDelay: '6.2s'
+          }}></div>
+        </div>
+
+        {/* Formes organiques supplémentaires */}
+        <div className="absolute top-1/8 right-2/5 w-20 h-20 opacity-[0.055]">
+          <div className="w-full h-full bg-violet-400 animate-bounce" style={{
+            clipPath: 'polygon(50% 0%, 83% 12%, 100% 43%, 94% 78%, 68% 100%, 32% 100%, 6% 78%, 0% 43%, 17% 12%)',
+            animationDelay: '3.8s'
+          }}></div>
+        </div>
+
+        <div className="absolute bottom-1/5 left-1/8 w-18 h-18 opacity-[0.06]">
+          <div className="w-full h-full bg-fuchsia-400 animate-spin" style={{
+            clipPath: 'polygon(50% 0%, 80% 10%, 100% 35%, 100% 70%, 80% 90%, 50% 100%, 20% 90%, 0% 70%, 0% 35%, 20% 10%)',
+            animationDelay: '7.5s',
+            animationDuration: '18s'
+          }}></div>
+        </div>
+
+        <div className="absolute top-2/5 right-1/8 w-16 h-16 opacity-[0.05]">
+          <div className="w-full h-full bg-emerald-500 animate-ping" style={{
+            clipPath: 'polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)',
+            animationDelay: '5.2s'
+          }}></div>
+        </div>
+
+        <div className="absolute bottom-3/5 right-3/5 w-12 h-12 opacity-[0.07]">
+          <div className="w-full h-full bg-orange-500 animate-pulse" style={{
+            borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
+            animationDelay: '9s'
+          }}></div>
+        </div>
+
+        <div className="absolute top-1/6 left-2/5 w-24 h-24 opacity-[0.045]">
+          <div className="w-full h-full bg-pink-500 animate-bounce" style={{
+            clipPath: 'polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 0% 60%, 10% 20%)',
+            animationDelay: '4.2s'
+          }}></div>
+        </div>
+      </div>
+
+      {/* Contenu principal */}
+      <div className="relative z-10">
         <Dashboard />
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, BarChart3, Globe, Zap, TrendingUp, Crown, Check } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 // Stats qui défilent
 const statsCarousel = [
@@ -54,9 +55,20 @@ const plans = [
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [currentStat, setCurrentStat] = useState(0);
+  const { user } = useAuth();
 
   const handleGetStarted = () => {
     navigate('/shorten');
+  };
+
+  const handlePlanClick = (planName: string) => {
+    if (user) {
+      // Si l'utilisateur est connecté, aller au dashboard
+      navigate('/dashboard');
+    } else {
+      // Sinon, aller à la page d'authentification
+      navigate('/auth');
+    }
   };
 
   // Animation des stats
@@ -81,19 +93,89 @@ export const HomePage: React.FC = () => {
             }}></div>
           </div>
 
-          {/* Formes géométriques flottantes */}
+          {/* Formes géométriques flottantes avec nouvelles animations */}
           <div className="absolute top-10 left-1/4 w-32 h-32 opacity-[0.12]">
-            <div className="w-full h-full bg-blue-400 rounded-full animate-morph"></div>
+            <div className="w-full h-full bg-blue-400 rounded-full animate-morph orbit-animation"></div>
           </div>
           
           <div className="absolute top-1/3 right-1/4 w-24 h-24 opacity-[0.12]">
-            <div className="w-full h-full bg-purple-400 animate-drift" style={{
+            <div className="w-full h-full bg-purple-400 bounce-soft-animation" style={{
               clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'
             }}></div>
           </div>
 
           <div className="absolute bottom-1/3 left-1/6 w-20 h-20 opacity-[0.12]">
-            <div className="w-full h-full bg-indigo-400 rounded-lg animate-wave transform rotate-45"></div>
+            <div className="w-full h-full bg-indigo-400 rounded-lg wiggle-animation transform rotate-45"></div>
+          </div>
+
+          {/* Nouvelles formes avec animations diversifiées */}
+          <div className="absolute top-20 right-1/3 w-16 h-16 opacity-[0.10]">
+            <div className="w-full h-full bg-green-400 scale-pulse-animation" style={{
+              clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
+            }}></div>
+          </div>
+
+          <div className="absolute bottom-1/4 right-1/6 w-28 h-28 opacity-[0.08]">
+            <div className="w-full h-full bg-orange-400 rounded-full rotate-slow-animation" style={{ animationDelay: '3s' }}></div>
+          </div>
+
+          <div className="absolute top-1/2 left-1/12 w-12 h-12 opacity-[0.14]">
+            <div className="w-full h-full bg-pink-400 orbit-animation" style={{
+              clipPath: 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)',
+              animationDelay: '1.5s'
+            }}></div>
+          </div>
+
+          <div className="absolute top-3/4 left-1/3 w-18 h-18 opacity-[0.11]">
+            <div className="w-full h-full bg-cyan-400 rounded-lg bounce-soft-animation transform rotate-12" style={{ animationDelay: '2.5s' }}></div>
+          </div>
+
+          <div className="absolute bottom-1/6 left-2/3 w-14 h-14 opacity-[0.13]">
+            <div className="w-full h-full bg-yellow-400 wiggle-animation" style={{
+              clipPath: 'polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%)',
+              animationDelay: '4s'
+            }}></div>
+          </div>
+
+          <div className="absolute top-1/6 left-1/2 w-22 h-22 opacity-[0.09]">
+            <div className="w-full h-full bg-teal-400 rounded-full scale-pulse-animation" style={{ animationDelay: '5s' }}></div>
+          </div>
+
+          <div className="absolute bottom-1/2 right-1/12 w-10 h-10 opacity-[0.15]">
+            <div className="w-full h-full bg-violet-400 rotate-slow-animation" style={{
+              clipPath: 'polygon(0% 0%, 100% 0%, 100% 75%, 75% 75%, 75% 100%, 50% 75%, 0% 75%)',
+              animationDelay: '6s'
+            }}></div>
+          </div>
+
+          {/* Éléments flottants supplémentaires avec nouvelles animations */}
+          <div className="absolute top-1/8 right-1/5 w-8 h-8 opacity-[0.12]">
+            <div className="w-full h-full bg-emerald-400 rounded-full orbit-animation" style={{ animationDelay: '2.2s' }}></div>
+          </div>
+
+          <div className="absolute bottom-1/8 left-3/4 w-26 h-26 opacity-[0.07]">
+            <div className="w-full h-full bg-rose-400 bounce-soft-animation" style={{
+              clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
+              animationDelay: '3.8s'
+            }}></div>
+          </div>
+
+          <div className="absolute top-2/3 left-1/8 w-15 h-15 opacity-[0.11]">
+            <div className="w-full h-full bg-amber-400 wiggle-animation" style={{
+              clipPath: 'polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 0% 60%, 10% 20%)',
+              animationDelay: '1.8s'
+            }}></div>
+          </div>
+
+          <div className="absolute bottom-2/5 right-2/5 w-12 h-12 opacity-[0.13]">
+            <div className="w-full h-full bg-lime-400 rounded-lg scale-pulse-animation transform rotate-30" style={{ animationDelay: '4.5s' }}></div>
+          </div>
+
+          <div className="absolute top-4/5 right-1/8 w-20 h-20 opacity-[0.09]">
+            <div className="w-full h-full bg-sky-400 rotate-slow-animation" style={{
+              clipPath: 'circle(50% at 50% 50%)',
+              animationDelay: '7s'
+            }}></div>
           </div>
 
           {/* Particules orbitales */}
@@ -352,7 +434,10 @@ export const HomePage: React.FC = () => {
                   ))}
                 </div>
 
-                <button className={`w-full py-3 md:py-4 px-4 md:px-6 rounded-xl md:rounded-2xl font-medium text-base md:text-lg transition-all duration-300 ${plan.buttonStyle}`}>
+                <button 
+                  onClick={() => handlePlanClick(plan.name)}
+                  className={`w-full py-3 md:py-4 px-4 md:px-6 rounded-xl md:rounded-2xl font-medium text-base md:text-lg transition-all duration-300 ${plan.buttonStyle}`}
+                >
                   {plan.buttonText}
                 </button>
               </div>
