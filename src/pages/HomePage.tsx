@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, BarChart3, Globe, Zap, TrendingUp, Crown, Check } from 'lucide-react';
-import { ClickDemo } from '../components/Demo/ClickDemo';
 
 // Stats qui défilent
 const statsCarousel = [
@@ -55,14 +54,9 @@ const plans = [
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [currentStat, setCurrentStat] = useState(0);
-  const [showDemo, setShowDemo] = useState(false);
 
   const handleGetStarted = () => {
     navigate('/shorten');
-  };
-
-  const handleShowDemo = () => {
-    setShowDemo(true);
   };
 
   // Animation des stats
@@ -234,82 +228,75 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Titre principal */}
-          <h1 className="text-6xl md:text-8xl font-light text-gray-900 mb-6 tracking-tight">
-            Des liens.
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-light text-gray-900 mb-4 md:mb-6 tracking-tight">
+            Le meilleur
             <br />
             <span className="font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Des insights.
+              outil pour tracker
             </span>
+            <br />
+            <span className="font-light">les liens.</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
+          <p className="text-lg md:text-xl lg:text-2xl text-gray-600 mb-8 md:mb-12 max-w-3xl mx-auto font-light leading-relaxed px-4">
             Transformez vos liens en données précieuses. Analytics en temps réel, 
             géolocalisation avancée, et insights qui font la différence.
           </p>
 
           {/* Ajout d'un simple call-to-action à la place du formulaire */}
-          <div className="max-w-2xl mx-auto mb-16 text-center">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 border">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Prêt à raccourcir votre premier lien ?
+          <div className="max-w-2xl mx-auto mb-12 md:mb-16 text-center px-4">
+            <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl p-6 md:p-8 border">
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">
+                Prêt à tracker vos liens ?
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6 leading-relaxed">
                 Créez des liens courts élégants et suivez leurs performances en temps réel.
               </p>
               <button 
                 onClick={handleGetStarted}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 mx-auto"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 md:px-8 py-3 md:py-4 rounded-lg md:rounded-xl font-semibold text-base md:text-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 flex items-center space-x-2 mx-auto"
               >
-                <span>Raccourcir un lien</span>
-                <ArrowRight className="w-5 h-5" />
+                <span>Tracker vos liens gratuitement</span>
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
               </button>
             </div>
           </div>
 
           {/* CTA */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center px-4">
             <button 
-              onClick={handleGetStarted}
-              className="bg-gray-900 text-white px-8 py-4 rounded-2xl font-medium text-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center space-x-2"
+              onClick={() => navigate('/shorten')}
+              className="bg-gray-900 text-white px-8 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-medium text-base md:text-lg hover:bg-gray-800 transition-all duration-300 flex items-center justify-center space-x-2"
             >
-              <span>Commencer gratuitement</span>
-              <ArrowRight className="h-5 w-5" />
-            </button>
-            <button 
-              onClick={handleShowDemo}
-              className="text-blue-600 px-8 py-4 rounded-2xl font-medium text-lg hover:bg-gray-50 transition-all duration-300"
-            >
-              Voir une démo
+              <span>Raccourcir un lien</span>
+              <ArrowRight className="h-4 w-4 md:h-5 md:w-5" />
             </button>
           </div>
         </div>
-
-        {/* Demo Modal */}
-        <ClickDemo isOpen={showDemo} onClose={() => setShowDemo(false)} />
       </section>
 
       {/* Zone 2: Features avec carrousel */}
-      <section className="py-32 bg-gray-50">
+      <section className="py-16 md:py-32 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-6">
+          <div className="text-center mb-12 md:mb-20">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 mb-4 md:mb-6">
               Fonctionnalités <span className="font-medium text-blue-600">avancées</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
               Des outils puissants pour maximiser l'impact de vos liens
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
             {features.map((feature, index) => {
               const IconComponent = feature.icon;
               return (
                 <div key={index} className="text-center group">
-                  <div className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center mx-auto mb-6 group-hover:shadow-2xl transition-all duration-300">
-                    <IconComponent className="w-8 h-8 text-blue-600" />
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-xl md:rounded-2xl shadow-lg flex items-center justify-center mx-auto mb-4 md:mb-6 group-hover:shadow-2xl transition-all duration-300">
+                    <IconComponent className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
                   </div>
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-4">{feature.title}</h3>
-                  <p className="text-gray-600 text-lg">{feature.description}</p>
+                  <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-3 md:mb-4">{feature.title}</h3>
+                  <p className="text-gray-600 text-base md:text-lg px-4">{feature.description}</p>
                 </div>
               );
             })}
@@ -318,54 +305,54 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Zone 3: Pricing simplifié */}
-      <section className="py-32 bg-white">
+      <section className="py-16 md:py-32 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-6xl font-light text-gray-900 mb-6">
+          <div className="text-center mb-12 md:mb-20">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 mb-4 md:mb-6">
               Plans <span className="font-medium text-blue-600">simples</span>
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-lg md:text-xl text-gray-600 px-4">
               Choisissez le plan qui correspond à vos besoins
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
             {plans.map((plan, index) => (
               <div 
                 key={index} 
-                className={`relative p-8 rounded-3xl border-2 transition-all duration-300 ${
+                className={`relative p-6 md:p-8 rounded-2xl md:rounded-3xl border-2 transition-all duration-300 ${
                   plan.popular 
-                    ? 'border-blue-500 shadow-2xl scale-105' 
+                    ? 'border-blue-500 shadow-2xl md:scale-105' 
                     : 'border-gray-200 hover:border-gray-300 hover:shadow-xl'
                 }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-semibold flex items-center space-x-1">
-                      <Crown className="w-4 h-4" />
+                  <div className="absolute -top-3 md:-top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-blue-600 text-white px-4 md:px-6 py-1 md:py-2 rounded-full text-xs md:text-sm font-semibold flex items-center space-x-1">
+                      <Crown className="w-3 h-3 md:w-4 md:h-4" />
                       <span>Populaire</span>
                     </div>
                   </div>
                 )}
 
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <div className="text-5xl font-light text-gray-900 mb-2">
-                    {plan.price}<span className="text-lg text-gray-500">/mois</span>
+                <div className="text-center mb-6 md:mb-8">
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                  <div className="text-3xl md:text-5xl font-light text-gray-900 mb-2">
+                    {plan.price}<span className="text-base md:text-lg text-gray-500">/mois</span>
                   </div>
-                  <p className="text-gray-600">{plan.description}</p>
+                  <p className="text-sm md:text-base text-gray-600">{plan.description}</p>
                 </div>
 
-                <div className="space-y-4 mb-8">
+                <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
                   {plan.features.map((feature, featureIndex) => (
                     <div key={featureIndex} className="flex items-center space-x-3">
-                      <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
+                      <Check className="w-4 h-4 md:w-5 md:h-5 text-green-500 flex-shrink-0" />
+                      <span className="text-sm md:text-base text-gray-700">{feature}</span>
                     </div>
                   ))}
                 </div>
 
-                <button className={`w-full py-4 px-6 rounded-2xl font-medium transition-all duration-300 ${plan.buttonStyle}`}>
+                <button className={`w-full py-3 md:py-4 px-4 md:px-6 rounded-xl md:rounded-2xl font-medium text-base md:text-lg transition-all duration-300 ${plan.buttonStyle}`}>
                   {plan.buttonText}
                 </button>
               </div>
@@ -375,24 +362,27 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Zone 4: CTA Final */}
-      <section className="py-32 bg-gray-900">
+      <section className="py-16 md:py-32 bg-gray-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-5xl md:text-6xl font-light text-white mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-white mb-4 md:mb-6">
             Prêt à commencer ?
           </h2>
-          <p className="text-xl text-gray-300 mb-12 font-light">
+          <p className="text-lg md:text-xl text-gray-300 mb-8 md:mb-12 font-light px-4">
             Rejoignez des milliers d'utilisateurs qui font confiance à ClickTracker.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center px-4">
+            <button 
+              onClick={() => navigate('/shorten')}
+              className="border border-gray-600 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-medium text-base md:text-lg hover:border-gray-400 transition-all duration-300"
+            >
+              Raccourcir un lien
+            </button>
             <button 
               onClick={handleGetStarted}
-              className="bg-white text-gray-900 px-8 py-4 rounded-2xl font-medium text-lg hover:bg-gray-100 transition-all duration-300"
+              className="bg-white text-gray-900 px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-medium text-base md:text-lg hover:bg-gray-100 transition-all duration-300"
             >
-              Commencer gratuitement
-            </button>
-            <button className="border border-gray-600 text-white px-8 py-4 rounded-2xl font-medium text-lg hover:border-gray-400 transition-all duration-300">
-              Parler à un expert
+              Tracker vos liens gratuitement
             </button>
           </div>
         </div>

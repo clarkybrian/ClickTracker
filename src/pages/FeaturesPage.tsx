@@ -71,15 +71,15 @@ export const FeaturesPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 py-20">
+      <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6">
             Fonctionnalités
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
               Avancées
             </span>
           </h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-blue-100 max-w-3xl mx-auto px-4">
             Découvrez tous les outils dont vous avez besoin pour transformer vos liens 
             en données précieuses et optimiser votre stratégie digitale.
           </p>
@@ -87,13 +87,13 @@ export const FeaturesPage: React.FC = () => {
       </div>
 
       {/* Features Grid */}
-      <div className="py-20 bg-white">
+      <div className="py-12 md:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 md:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
               Tout ce dont vous avez <span className="gradient-text">besoin</span>
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-base md:text-lg lg:text-xl text-gray-600 px-4">
               Une suite complète d'outils pour analyser et optimiser vos liens
             </p>
           </div>
@@ -202,19 +202,19 @@ export const FeaturesPage: React.FC = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+      <div className="py-12 md:py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 md:mb-6">
             Prêt à découvrir toutes ces fonctionnalités ?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-base md:text-lg lg:text-xl text-blue-100 mb-6 md:mb-8 px-4">
             Commencez gratuitement et explorez tout le potentiel de ClickTracker
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center px-4">
+            <button className="bg-white text-blue-600 px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-semibold text-base md:text-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
               Essayer Gratuitement
             </button>
-            <button className="bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold text-lg border border-blue-500 hover:bg-blue-800 transition-all duration-300">
+            <button className="bg-blue-700 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-semibold text-base md:text-lg border border-blue-500 hover:bg-blue-800 transition-all duration-300">
               Voir une Démo
             </button>
           </div>

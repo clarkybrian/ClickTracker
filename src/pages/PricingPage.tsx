@@ -53,15 +53,15 @@ export const PricingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 py-20">
+      <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6">
             Choisissez le plan qui vous
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
               convient le mieux
             </span>
           </h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-blue-100 max-w-3xl mx-auto px-4">
             Commencez gratuitement et upgrader quand vous êtes prêt pour des fonctionnalités avancées.
             Pas d'engagement, annulez à tout moment.
           </p>
