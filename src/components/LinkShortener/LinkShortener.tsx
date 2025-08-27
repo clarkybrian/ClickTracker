@@ -50,7 +50,7 @@ export const LinkShortener: React.FC<LinkShortenerProps> = ({ onLinkCreated }) =
         setUrl('');
         setCustomAlias('');
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred while creating the short link');
     } finally {
       setLoading(false);
@@ -68,13 +68,13 @@ export const LinkShortener: React.FC<LinkShortenerProps> = ({ onLinkCreated }) =
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold text-gray-900 mb-4">
-          Shorten Links, Track
-          <span className="text-blue-600 ml-3">Everything</span>
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          Raccourcissez vos liens,
+          <span className="block gradient-text">Trackez tout</span>
         </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Create short links, track clicks, and analyze your audience with detailed analytics.
-          Perfect for marketers, businesses, and content creators.
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          Créez des liens courts, suivez les clics et analysez votre audience avec des analytics détaillés.
+          Parfait pour les marketeurs, entreprises et créateurs de contenu.
         </p>
       </div>
 
