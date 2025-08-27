@@ -41,3 +41,32 @@ coverage/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Fichiers système Windows/Linux à exclure
+.bash_history
+.bash_profile
+.bashrc
+.condarc
+.cortex-debug
+keyring
+adbkey
+adbkey.pub
+analytics.settings
+debug.keystore
+debug.keystore.lock
+emu-*
+modem-*
+Pixel_*
+AVD.conf
+bootcompleted.ini
+cache.img*
+config.ini
+emu-launch-*
+
+# Autres fichiers système à ignorer
+.*
+!.gitignore
+!.gitattributes
+!.github/
+!.vscode/settings.json
+!.vscode/extensions.json
