@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Link, Globe, Tag, Eye, EyeOff } from 'lucide-react';
+import { X, Link, Globe, Tag } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { Link as LinkType } from '../../types';
@@ -24,8 +24,7 @@ export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
     originalUrl: '',
     customAlias: '',
     title: '',
-    description: '',
-    isPrivate: false
+    description: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -105,7 +104,6 @@ export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
           short_code: shortCode,
           title: formData.title || null,
           description: formData.description || null,
-          is_private: formData.isPrivate,
           is_active: true
         })
         .select('*')
@@ -130,8 +128,7 @@ export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
         originalUrl: '',
         customAlias: '',
         title: '',
-        description: '',
-        isPrivate: false
+        description: ''
       });
 
     } catch (err: unknown) {
@@ -252,34 +249,6 @@ export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
               maxLength={250}
               disabled={loading || hasReachedLimit}
             />
-          </div>
-
-          {/* Visibilité */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              {formData.isPrivate ? (
-                <EyeOff className="w-4 h-4 text-gray-600" />
-              ) : (
-                <Eye className="w-4 h-4 text-gray-600" />
-              )}
-              <span className="text-sm font-medium text-gray-700">
-                {formData.isPrivate ? 'Lien privé' : 'Lien public'}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setFormData({ ...formData, isPrivate: !formData.isPrivate })}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                formData.isPrivate ? 'bg-blue-600' : 'bg-gray-200'
-              }`}
-              disabled={loading || hasReachedLimit}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  formData.isPrivate ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
           </div>
 
           {/* Erreur */}

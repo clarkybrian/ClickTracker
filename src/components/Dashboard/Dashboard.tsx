@@ -478,10 +478,10 @@ export const Dashboard: React.FC = () => {
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
                         <span className="font-medium text-gray-900">
-                          {link.total_clicks.toLocaleString()}
+                          {(link.total_clicks || 0).toLocaleString()}
                         </span>
                         <span className="text-sm text-gray-500">
-                          {link.unique_clicks} uniques
+                          {link.unique_clicks || 0} uniques
                         </span>
                       </div>
                     </td>

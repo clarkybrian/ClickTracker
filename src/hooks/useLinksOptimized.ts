@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { Link } from '../types';
 
-export const useLinks = (userId: string | undefined) => {
+export const useLinksOptimized = (userId: string | undefined) => {
   const [links, setLinks] = useState<Link[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,57 +19,28 @@ export const useLinks = (userId: string | undefined) => {
 
     try {
       setLoading(true);
+      
+      // Utiliser la vue optimisée links_with_stats
       const { data, error: fetchError } = await supabase
-        .from('links')
-        .select(`
-          id,
-          user_id,
-          original_url,
-          short_code,
-          title,
-          description,
-          is_active,
-          created_at,
-          updated_at
-        `)
+        .from('links_with_stats')
+        .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
 
-      // Pour chaque lien, récupérer les statistiques de clics depuis la table clicks
-      const linksWithStats = await Promise.all((data || []).map(async (link) => {
-        // Compter le nombre total de clics pour ce lien
-        const { count: totalClicks } = await supabase
-          .from('clicks')
-          .select('*', { count: 'exact', head: true })
-          .eq('link_id', link.id);
-
-        // Compter les clics uniques (par session_id ou par IP si session_id n'existe pas)
-        const { data: uniqueClicksData } = await supabase
-          .from('clicks')
-          .select('ip_address')
-          .eq('link_id', link.id);
-
-        // Calculer les visiteurs uniques basé sur l'IP
-        const uniqueIPs = new Set(uniqueClicksData?.map(click => click.ip_address) || []);
-        const uniqueClicks = uniqueIPs.size;
-
-        return {
-          ...link,
-          full_short_url: `${window.location.origin}/r/${link.short_code}`,
-          total_clicks: totalClicks || 0,
-          unique_clicks: uniqueClicks,
-          is_private: false // Valeur par défaut
-        };
+      // Ajouter l'URL complète à chaque lien
+      const linksWithFullUrl = (data || []).map(link => ({
+        ...link,
+        full_short_url: `${window.location.origin}/r/${link.short_code}`,
+        is_private: false // Valeur par défaut
       }));
 
-      setLinks(linksWithStats);
+      setLinks(linksWithFullUrl);
       setError(null);
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('Erreur lors du chargement des liens:', err);
-      setError('Erreur lors du chargement des liens');
-      setLinks([]);
+      setError(err instanceof Error ? err.message : 'Erreur inconnue');
     } finally {
       setLoading(false);
     }
@@ -107,7 +78,9 @@ export const useLinks = (userId: string | undefined) => {
     if (!error && data) {
       const linkWithFullUrl = {
         ...data,
-        full_short_url: `${window.location.origin}/r/${data.short_code}`
+        full_short_url: `${window.location.origin}/r/${data.short_code}`,
+        total_clicks: 0,
+        unique_clicks: 0
       };
       addLink(linkWithFullUrl);
       return linkWithFullUrl;
@@ -131,8 +104,10 @@ export const useLinks = (userId: string | undefined) => {
       .eq('id', linkId);
 
     if (!error) {
-      setLinks(prev => prev.filter(link => link.id !== linkId));
+      setLinks(prevLinks => prevLinks.filter(link => link.id !== linkId));
     }
+
+    return !error;
   };
 
   const toggleLinkStatus = async (linkId: string, isActive: boolean) => {
@@ -144,30 +119,23 @@ export const useLinks = (userId: string | undefined) => {
     if (!error) {
       updateLink(linkId, { is_active: isActive });
     }
+
+    return !error;
   };
 
-  // Vérifier si l'utilisateur a atteint la limite gratuite
-  const hasReachedFreeLimit = () => {
-    return links.length >= FREE_LINK_LIMIT;
-  };
-
-  // Obtenir le nombre de liens restants
-  const getRemainingLinks = () => {
-    return Math.max(0, FREE_LINK_LIMIT - links.length);
-  };
+  // Vérifier si l'utilisateur a atteint sa limite
+  const hasReachedLimit = links.length >= FREE_LINK_LIMIT;
 
   return {
     links,
     loading,
     error,
+    hasReachedLimit,
     createLink,
     deleteLink,
     toggleLinkStatus,
-    addLink,
-    updateLink,
     refetch: fetchLinks,
-    hasReachedFreeLimit: hasReachedFreeLimit(),
-    remainingLinks: getRemainingLinks(),
-    freeLimit: FREE_LINK_LIMIT
+    addLink,
+    updateLink
   };
 };

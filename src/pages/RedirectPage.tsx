@@ -50,42 +50,97 @@ export const RedirectPage: React.FC = () => {
           device = 'Tablet';
         }
 
-        // Obtenir l'IP et le pays (via une API externe)
-        let country = 'Unknown';
+        // Obtenir l'IP et la géolocalisation (via une API externe)
+        let geoData = {
+          country_code: null,
+          country_name: 'Unknown',
+          region: null,
+          city: null,
+          latitude: null,
+          longitude: null,
+          timezone: null
+        };
+
         try {
           const ipResponse = await fetch('https://ipapi.co/json/');
           const ipData = await ipResponse.json();
-          country = ipData.country_name || 'Unknown';
+          geoData = {
+            country_code: ipData.country_code || null,
+            country_name: ipData.country_name || 'Unknown',
+            region: ipData.region || null,
+            city: ipData.city || null,
+            latitude: ipData.latitude || null,
+            longitude: ipData.longitude || null,
+            timezone: ipData.timezone || null
+          };
         } catch (err) {
           console.warn('Impossible de récupérer la géolocalisation:', err);
         }
 
-        // Enregistrer le clic
+        // Générer un session_id unique pour ce clic
+        const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        // Enregistrer le clic avec la structure complète de votre BD
         const clickData = {
           link_id: link.id,
-          country,
-          device,
-          browser,
-          referrer,
+          ip_address: null, // Sera automatiquement détecté côté serveur dans un vrai déploiement
           user_agent: userAgent,
-          clicked_at: new Date().toISOString()
+          referer: referrer,
+          
+          // Géolocalisation
+          country_code: geoData.country_code,
+          country_name: geoData.country_name,
+          region: geoData.region,
+          city: geoData.city,
+          latitude: geoData.latitude,
+          longitude: geoData.longitude,
+          timezone: geoData.timezone,
+          
+          // Informations appareil/navigateur
+          browser_name: browser,
+          browser_version: null, // Peut être extrait avec une lib dédiée
+          os_name: null, // Peut être extrait du user agent
+          os_version: null,
+          device_type: device.toLowerCase(),
+          device_brand: null,
+          device_model: null,
+          
+          // Session et bot detection
+          session_id: sessionId,
+          is_unique_visitor: true, // Sera calculé plus tard
+          is_bot: /bot|crawler|spider|crawling/i.test(userAgent),
+          
+          // UTM (à extraire des paramètres URL si présents)
+          utm_source: null,
+          utm_medium: null,
+          utm_campaign: null,
+          utm_term: null,
+          utm_content: null,
+          
+          // Timestamp
+          clicked_at: new Date().toISOString(),
+          
+          // Données brutes pour analyses futures
+          raw_data: {
+            full_user_agent: userAgent,
+            referrer_full: referrer,
+            timestamp: Date.now()
+          }
         };
 
+        console.log('📊 Enregistrement du clic:', clickData);
+
         // Insérer dans la table clicks
-        await supabase.from('clicks').insert([clickData]);
+        const { error: clickError } = await supabase.from('clicks').insert([clickData]);
+        
+        if (clickError) {
+          console.error('Erreur enregistrement clic:', clickError);
+        } else {
+          console.log('✅ Clic enregistré avec succès');
+        }
 
-        // Mettre à jour les compteurs du lien
-        const { data: updatedLink } = await supabase
-          .from('links')
-          .update({
-            total_clicks: link.total_clicks + 1,
-            last_clicked_at: new Date().toISOString()
-          })
-          .eq('id', link.id)
-          .select()
-          .single();
-
-        // Rediriger vers l'URL originale
+        // Rediriger immédiatement vers l'URL originale
+        // Les stats seront mises à jour en temps réel via Realtime
         window.location.href = link.original_url;
 
       } catch (err) {

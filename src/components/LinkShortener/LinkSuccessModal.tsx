@@ -108,11 +108,11 @@ export const LinkSuccessModal: React.FC<LinkSuccessModalProps> = ({
             </div>
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
-                <div className="text-lg font-bold text-blue-900">{link.total_clicks}</div>
+                <div className="text-lg font-bold text-blue-900">{link.total_clicks || 0}</div>
                 <div className="text-xs text-blue-600">Clics totaux</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-blue-900">{link.unique_clicks}</div>
+                <div className="text-lg font-bold text-blue-900">{link.unique_clicks || 0}</div>
                 <div className="text-xs text-blue-600">Visiteurs uniques</div>
               </div>
             </div>

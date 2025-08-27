@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, BarChart3, Globe, Zap, TrendingUp, Crown, Check } from 'lucide-react';
+import { ArrowRight, BarChart3, Globe, Zap, TrendingUp, Crown, Check, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 // Stats qui défilent
@@ -30,25 +30,99 @@ const features = [
   }
 ];
 
-// Plans pricing
+// Plans pricing avec stratégie psychologique - 4 formules avec escalade des fonctionnalités
 const plans = [
   {
-    name: "Gratuit",
+    name: "Starter",
     price: "0€",
-    description: "Parfait pour commencer",
-    features: ["5 liens/jour", "Analytics 24h", "Support email"],
+    description: "Pour découvrir",
+    features: ["Raccourcir liens", "1 lien", "Clics 24h"],
+    featuresDetailed: [
+      { text: "Raccourcissement de liens", included: true },
+      { text: "1 lien actif seulement", included: true },
+      { text: "Clics totaux (24h)", included: true },
+      { text: "Pays principal des visiteurs", included: false },
+      { text: "Clics uniques vs totaux", included: false },
+      { text: "Géolocalisation détaillée", included: false },
+      { text: "Types d'appareils", included: false },
+      { text: "Navigateurs utilisés", included: false },
+      { text: "Sources de trafic", included: false },
+      { text: "Tracking temps réel", included: false }
+    ],
     buttonText: "Commencer",
-    buttonStyle: "bg-gray-900 text-white hover:bg-gray-800",
-    popular: false
+    buttonStyle: "bg-gray-100 text-gray-800 hover:bg-gray-200",
+    popular: false,
+    originalPrice: null,
+    savings: null
   },
   {
-    name: "Premium",
-    price: "9€",
-    description: "Pour les professionnels",
-    features: ["Liens illimités", "Analytics avancés", "Export de données", "Support prioritaire"],
-    buttonText: "Essayer Premium",
+    name: "Pro",
+    price: "19€",
+    description: "Le plus populaire",
+    features: ["5 liens", "Clics uniques", "Géolocalisation", "Appareils"],
+    featuresDetailed: [
+      { text: "5 liens actifs", included: true },
+      { text: "Clics uniques vs totaux", included: true },
+      { text: "Géolocalisation détaillée", included: true },
+      { text: "Types d'appareils", included: true },
+      { text: "Navigateurs utilisés", included: true },
+      { text: "Sources de trafic", included: true },
+      { text: "Tracking temps réel", included: false },
+      { text: "Heures de pointe", included: false },
+      { text: "Export avancé", included: false },
+      { text: "QR personnalisés", included: false }
+    ],
+    buttonText: "Essayer Pro",
     buttonStyle: "bg-blue-600 text-white hover:bg-blue-700",
-    popular: true
+    popular: true,
+    originalPrice: null,
+    savings: null
+  },
+  {
+    name: "Business",
+    price: "25€",
+    description: "Meilleure valeur",
+    features: ["15 liens", "Temps réel", "Heures de pointe", "QR codes"],
+    featuresDetailed: [
+      { text: "15 liens actifs", included: true },
+      { text: "Tracking temps réel", included: true },
+      { text: "Heures de pointe d'activité", included: true },
+      { text: "Export données avancé", included: true },
+      { text: "Liens personnalisés", included: true },
+      { text: "QR codes personnalisés", included: true },
+      { text: "Statistiques comparatives", included: true },
+      { text: "Rapports automatisés", included: true },
+      { text: "API complète", included: false },
+      { text: "Multi-domaines", included: false }
+    ],
+    buttonText: "Choisir Business",
+    buttonStyle: "bg-green-600 text-white hover:bg-green-700",
+    popular: false,
+    originalPrice: "30€",
+    savings: "-17%"
+  },
+  {
+    name: "Enterprise",
+    price: "49€",
+    description: "Pour entreprises",
+    features: ["25 liens", "API + Webhooks", "Multi-domaines", "Support 24/7"],
+    featuresDetailed: [
+      { text: "25 liens actifs", included: true },
+      { text: "API complète + webhooks", included: true },
+      { text: "Multi-domaines personnalisés", included: true },
+      { text: "Intégrations tierces", included: true },
+      { text: "White-label complet", included: true },
+      { text: "Analytics prédictives", included: true },
+      { text: "Support dédié 24/7", included: true },
+      { text: "SLA 99.9% garanti", included: true },
+      { text: "Manager de compte", included: true },
+      { text: "Formation personnalisée", included: true }
+    ],
+    buttonText: "Contacter",
+    buttonStyle: "bg-purple-600 text-white hover:bg-purple-700",
+    popular: false,
+    originalPrice: null,
+    savings: null
   }
 ];
 
@@ -62,12 +136,29 @@ export const HomePage: React.FC = () => {
   };
 
   const handlePlanClick = (planName: string) => {
-    if (user) {
-      // Si l'utilisateur est connecté, aller au dashboard
-      navigate('/dashboard');
+    if (planName === "Starter") {
+      // Pour le plan gratuit, rediriger selon l'état de connexion
+      if (user) {
+        navigate('/dashboard');
+      } else {
+        navigate('/auth');
+      }
+    } else if (planName === "Pro") {
+      // Plan Pro - 19€ - Redirection vers Stripe
+      window.open('https://buy.stripe.com/9B6bJ01Qa62A1Tw8pRcV200', '_blank');
+    } else if (planName === "Business") {
+      // Plan Business - 25€ - Redirection vers Stripe
+      window.open('https://buy.stripe.com/bJebJ09iC62AeGiaxZcV201', '_blank');
+    } else if (planName === "Enterprise") {
+      // Plan Enterprise - 49€ - Redirection vers Stripe
+      window.open('https://buy.stripe.com/cNi28qcuObmUfKm5dFcV202', '_blank');
     } else {
-      // Sinon, aller à la page d'authentification
-      navigate('/auth');
+      // Fallback pour les autres plans
+      if (user) {
+        navigate('/dashboard');
+      } else {
+        navigate('/auth', { state: { selectedPlan: planName } });
+      }
     }
   };
 
@@ -325,6 +416,81 @@ export const HomePage: React.FC = () => {
             géolocalisation avancée, et insights qui font la différence.
           </p>
 
+          {/* Carrousel des entreprises qui nous font confiance */}
+          <div className="mb-12 md:mb-16">
+            <p className="text-sm md:text-base text-gray-500 mb-6 md:mb-8 font-medium tracking-wide uppercase">
+              Ils nous font confiance
+            </p>
+            <div className="relative overflow-hidden">
+              {/* Container du carrousel */}
+              <div className="flex animate-scroll-infinite space-x-8 md:space-x-12">
+                {/* Première série d'entreprises */}
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c9/OpenAI_Logo.svg" alt="OpenAI" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/d/de/Amazon_icon.png" alt="Amazon" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Shopify_logo_2018.svg" alt="Shopify" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg" alt="Airbnb" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <div className="text-xl md:text-2xl font-bold text-gray-600">ANTHROPIC</div>
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Docker_%28container_engine%29_logo.svg" alt="Docker" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Stripe_logo%2C_revised_2016.svg" alt="Stripe" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Notion-logo.svg" alt="Notion" className="h-6 md:h-8 object-contain" />
+                </div>
+                
+                {/* Duplication pour l'effet infini */}
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c9/OpenAI_Logo.svg" alt="OpenAI" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/d/de/Amazon_icon.png" alt="Amazon" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Shopify_logo_2018.svg" alt="Shopify" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg" alt="Airbnb" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <div className="text-xl md:text-2xl font-bold text-gray-600">ANTHROPIC</div>
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Docker_%28container_engine%29_logo.svg" alt="Docker" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Stripe_logo%2C_revised_2016.svg" alt="Stripe" className="h-6 md:h-8 object-contain" />
+                </div>
+                <div className="flex items-center justify-center min-w-[120px] md:min-w-[140px] h-12 md:h-16 grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Notion-logo.svg" alt="Notion" className="h-6 md:h-8 object-contain" />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Ajout d'un simple call-to-action à la place du formulaire */}
           <div className="max-w-2xl mx-auto mb-12 md:mb-16 text-center px-4">
             <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl p-6 md:p-8 border">
@@ -393,18 +559,28 @@ export const HomePage: React.FC = () => {
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 mb-4 md:mb-6">
               Plans <span className="font-medium text-blue-600">simples</span>
             </h2>
-            <p className="text-lg md:text-xl text-gray-600 px-4">
+            <p className="text-lg md:text-xl text-gray-600 px-4 mb-6">
               Choisissez le plan qui correspond à vos besoins
             </p>
+            <div className="inline-flex items-center space-x-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium">
+              <span>⚡</span>
+              <span>Lancement : -50% sur tous les plans jusqu'au 30 septembre !</span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 max-w-7xl mx-auto">
             {plans.map((plan, index) => (
               <div 
                 key={index} 
                 className={`relative p-6 md:p-8 rounded-2xl md:rounded-3xl border-2 transition-all duration-300 ${
                   plan.popular 
                     ? 'border-blue-500 shadow-2xl md:scale-105' 
+                    : plan.savings
+                    ? 'border-green-500 shadow-2xl md:scale-102'
+                    : plan.name === 'Starter'
+                    ? 'border-gray-200 hover:border-gray-300 hover:shadow-lg'
+                    : plan.name === 'Enterprise'
+                    ? 'border-purple-300 hover:border-purple-400 hover:shadow-xl'
                     : 'border-gray-200 hover:border-gray-300 hover:shadow-xl'
                 }`}
               >
@@ -412,15 +588,45 @@ export const HomePage: React.FC = () => {
                   <div className="absolute -top-3 md:-top-4 left-1/2 transform -translate-x-1/2">
                     <div className="bg-blue-600 text-white px-4 md:px-6 py-1 md:py-2 rounded-full text-xs md:text-sm font-semibold flex items-center space-x-1">
                       <Crown className="w-3 h-3 md:w-4 md:h-4" />
-                      <span>Populaire</span>
+                      <span>Le plus populaire</span>
+                    </div>
+                  </div>
+                )}
+
+                {plan.name === 'Business' && (
+                  <div className="absolute -top-3 md:-top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-green-600 text-white px-4 md:px-6 py-1 md:py-2 rounded-full text-xs md:text-sm font-semibold flex items-center space-x-1">
+                      <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
+                      <span>Meilleure valeur</span>
+                    </div>
+                  </div>
+                )}
+
+                {plan.name === 'Enterprise' && (
+                  <div className="absolute -top-3 md:-top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-purple-600 text-white px-4 md:px-6 py-1 md:py-2 rounded-full text-xs md:text-sm font-semibold flex items-center space-x-1">
+                      <Zap className="w-3 h-3 md:w-4 md:h-4" />
+                      <span>Enterprise</span>
+                    </div>
+                  </div>
+                )}
+
+                {plan.savings && (
+                  <div className="absolute -top-2 -right-2">
+                    <div className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold transform rotate-12">
+                      {plan.savings}
                     </div>
                   </div>
                 )}
 
                 <div className="text-center mb-6 md:mb-8">
                   <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                  <div className="text-3xl md:text-5xl font-light text-gray-900 mb-2">
-                    {plan.price}<span className="text-base md:text-lg text-gray-500">/mois</span>
+                  <div className="flex items-baseline justify-center mb-2">
+                    {plan.originalPrice && (
+                      <span className="text-lg text-gray-400 line-through mr-2">{plan.originalPrice}</span>
+                    )}
+                    <span className="text-3xl md:text-5xl font-light text-gray-900">{plan.price}</span>
+                    <span className="text-base md:text-lg text-gray-500">/mois</span>
                   </div>
                   <p className="text-sm md:text-base text-gray-600">{plan.description}</p>
                 </div>
@@ -442,6 +648,24 @@ export const HomePage: React.FC = () => {
                 </button>
               </div>
             ))}
+          </div>
+
+          {/* Trust signals */}
+          <div className="mt-12 text-center">
+            <div className="flex flex-wrap justify-center items-center space-x-6 md:space-x-8 text-gray-600">
+              <div className="flex items-center space-x-2 mb-4">
+                <Check className="h-4 w-4 text-green-500" />
+                <span className="text-sm">Annulation libre</span>
+              </div>
+              <div className="flex items-center space-x-2 mb-4">
+                <Check className="h-4 w-4 text-green-500" />
+                <span className="text-sm">Activation immédiate</span>
+              </div>
+              <div className="flex items-center space-x-2 mb-4">
+                <Check className="h-4 w-4 text-green-500" />
+                <span className="text-sm">Support français</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

@@ -47,6 +47,24 @@
   }
 }
 
+/* Animation pour le carrousel infini */
+@keyframes scroll-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-infinite {
+  animation: scroll-infinite 30s linear infinite;
+}
+
+.animate-scroll-infinite:hover {
+  animation-play-state: paused;
+}
+
 @keyframes drift {
   0%, 100% {
     transform: translateX(0px) translateY(0px) rotate(0deg);

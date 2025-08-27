@@ -15,10 +15,10 @@ export interface Link {
   full_short_url: string;
   title?: string;
   description?: string;
-  total_clicks: number;
-  unique_clicks: number;
+  total_clicks?: number;  // Optional car pas encore dans la DB
+  unique_clicks?: number; // Optional car pas encore dans la DB
   is_active: boolean;
-  is_private: boolean;
+  is_private?: boolean;   // Optional car pas encore dans la DB
   created_at: string;
   updated_at: string;
   last_clicked_at?: string;
