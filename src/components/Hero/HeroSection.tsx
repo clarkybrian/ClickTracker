@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Users, Globe, TrendingUp } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 
 const stats = [
   { value: "10M+", label: "Liens créés", icon: ArrowRight },
@@ -35,6 +36,7 @@ const beforeAfterData = [
 export const HeroSection: React.FC = () => {
   const [currentStat, setCurrentStat] = useState(0);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -44,7 +46,13 @@ export const HeroSection: React.FC = () => {
   }, []);
 
   const handleAuthClick = () => {
-    navigate('/auth');
+    if (user) {
+      // Si l'utilisateur est connecté, rediriger vers le dashboard
+      navigate('/dashboard');
+    } else {
+      // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+      navigate('/auth');
+    }
   };
 
   const handleShortenClick = () => {

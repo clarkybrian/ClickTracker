@@ -132,7 +132,13 @@ export const HomePage: React.FC = () => {
   const { user } = useAuth();
 
   const handleGetStarted = () => {
-    navigate('/shorten');
+    if (user) {
+      // Si l'utilisateur est connecté, rediriger vers le dashboard
+      navigate('/dashboard');
+    } else {
+      // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+      navigate('/auth');
+    }
   };
 
   const handlePlanClick = (planName: string) => {
@@ -143,21 +149,14 @@ export const HomePage: React.FC = () => {
       } else {
         navigate('/auth');
       }
-    } else if (planName === "Pro") {
-      // Plan Pro - 19€ - Redirection vers Stripe
-      window.open('https://buy.stripe.com/9B6bJ01Qa62A1Tw8pRcV200', '_blank');
-    } else if (planName === "Business") {
-      // Plan Business - 25€ - Redirection vers Stripe
-      window.open('https://buy.stripe.com/bJebJ09iC62AeGiaxZcV201', '_blank');
-    } else if (planName === "Enterprise") {
-      // Plan Enterprise - 49€ - Redirection vers Stripe
-      window.open('https://buy.stripe.com/cNi28qcuObmUfKm5dFcV202', '_blank');
     } else {
-      // Fallback pour les autres plans
-      if (user) {
-        navigate('/dashboard');
+      // Pour tous les plans payants, rediriger vers auth si non connecté
+      if (!user) {
+        // Rediriger vers auth avec intention de payer le plan sélectionné
+        navigate(`/auth?plan=${planName.toLowerCase()}&intent=upgrade`);
       } else {
-        navigate('/auth', { state: { selectedPlan: planName } });
+        // Si connecté, rediriger vers la page d'upgrade
+        navigate(`/upgrade?selectedPlan=${planName.toLowerCase()}`);
       }
     }
   };

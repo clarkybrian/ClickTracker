@@ -1,7 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Check, Crown, Zap } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import { redirectToStripeCheckout } from '../../lib/stripe';
 
 export const PricingCard: React.FC = () => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+
+  const handleUpgrade = async () => {
+    if (!user?.email) {
+      alert('Vous devez être connecté pour effectuer un upgrade');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await redirectToStripeCheckout('business', user.email);
+    } catch (error) {
+      console.error('Erreur upgrade:', error);
+      alert('Erreur lors de la redirection vers Stripe');
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">
@@ -101,8 +122,12 @@ export const PricingCard: React.FC = () => {
             </li>
           </ul>
 
-          <button className="w-full py-3 px-6 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-            Upgrade to Premium
+          <button 
+            onClick={handleUpgrade}
+            disabled={loading}
+            className="w-full py-3 px-6 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Chargement...' : 'Upgrade to Premium'}
           </button>
         </div>
       </div>

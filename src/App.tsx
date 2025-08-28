@@ -9,6 +9,8 @@ import { FeaturesPage } from './pages/FeaturesPage';
 import { PricingPage } from './pages/PricingPage';
 import { ContactPage } from './pages/ContactPage';
 import { ShortenPage } from './pages/ShortenPage';
+import { SubscriptionPage } from './pages/SubscriptionPage';
+import UpgradePage from './pages/UpgradePage';
 import { RedirectPage } from './pages/RedirectPage';
 import { useAuth } from './hooks/useAuth';
 
@@ -56,8 +58,24 @@ function App() {
           <Route path="shorten" element={<ShortenPage />} />
           <Route path="features" element={<FeaturesPage />} />
           <Route path="pricing" element={<PricingPage />} />
+          <Route 
+            path="upgrade" 
+            element={
+              <ProtectedRoute>
+                <UpgradePage />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="contact" element={<ContactPage />} />
           <Route path="auth" element={<AuthPage />} />
+          <Route 
+            path="subscription" 
+            element={
+              <ProtectedRoute>
+                <SubscriptionPage />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="dashboard" 
             element={

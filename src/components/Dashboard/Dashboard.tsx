@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useLinks } from '../../hooks/useLinks';
+import { useSubscription } from '../../hooks/useSubscription';
 import { useNavigate } from 'react-router-dom';
 import { CreateLinkModal } from '../LinkShortener/CreateLinkModal';
 import { LinkSuccessModal } from '../LinkShortener/LinkSuccessModal';
-import { Link } from '../../types';
+import { PlanStatusCard } from './PlanStatusCard';
+import { Link, PlanType } from '../../types';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -30,6 +32,7 @@ interface DashboardStats {
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const { subscription, loading: subscriptionLoading, isProUser } = useSubscription(user);
   const navigate = useNavigate();
   const { 
     links, 
@@ -228,6 +231,13 @@ export const Dashboard: React.FC = () => {
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Plan Status Card */}
+        <div className="mb-8">
+          <PlanStatusCard 
+            currentPlan={subscription?.planType || 'starter'}
+          />
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-gray-100">

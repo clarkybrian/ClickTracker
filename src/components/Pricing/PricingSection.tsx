@@ -118,21 +118,14 @@ export const PricingSection: React.FC = () => {
       } else {
         navigate('/auth');
       }
-    } else if (planName === "Pro") {
-      // Plan Pro - 19€ - Redirection vers Stripe
-      window.open('https://buy.stripe.com/9B6bJ01Qa62A1Tw8pRcV200', '_blank');
-    } else if (planName === "Business") {
-      // Plan Business - 25€ - Redirection vers Stripe
-      window.open('https://buy.stripe.com/bJebJ09iC62AeGiaxZcV201', '_blank');
-    } else if (planName === "Enterprise") {
-      // Plan Enterprise - 49€ - Redirection vers Stripe
-      window.open('https://buy.stripe.com/cNi28qcuObmUfKm5dFcV202', '_blank');
     } else {
-      // Fallback pour les autres plans
-      if (user) {
-        navigate('/dashboard');
+      // Pour tous les plans payants, rediriger vers auth si non connecté
+      if (!user) {
+        // Rediriger vers auth avec intention de payer le plan sélectionné
+        navigate(`/auth?plan=${planName.toLowerCase()}&intent=upgrade`);
       } else {
-        navigate('/auth');
+        // Si connecté, rediriger vers la page de pricing pour l'upgrade
+        navigate(`/pricing?plan=${planName.toLowerCase()}`);
       }
     }
   };
