@@ -1,7 +1,14 @@
+export type PlanType = 'starter' | 'pro' | 'business' | 'enterprise';
+
 export interface User {
   id: string;
   email: string;
   isPremium: boolean;
+  planType: PlanType;
+  planStartDate?: string;
+  planEndDate?: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
   dailyLinksCount: number;
   lastLinkDate: string;
   createdAt: string;

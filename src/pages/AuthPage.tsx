@@ -1,6 +1,6 @@
 import React from 'react';
 import { AuthForm } from '../components/Auth/AuthForm';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Link2, TrendingUp, Users, Shield } from 'lucide-react';
 
 const benefits = [
@@ -23,9 +23,29 @@ const benefits = [
 
 export const AuthPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Récupérer les paramètres d'URL
+  const planFromUrl = searchParams.get('plan');
+  const intentFromUrl = searchParams.get('intent');
 
   const handleAuthSuccess = () => {
-    navigate('/dashboard');
+    // Si l'utilisateur venait pour upgrader, le rediriger vers la page d'upgrade
+    if (intentFromUrl === 'upgrade' && planFromUrl) {
+      navigate(`/upgrade?selectedPlan=${planFromUrl}`);
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
+  // Fonction pour obtenir le nom du plan en français
+  const getPlanDisplayName = (plan: string) => {
+    switch (plan) {
+      case 'pro': return 'Pro (19€/mois)';
+      case 'business': return 'Business (25€/mois)';
+      case 'enterprise': return 'Enterprise (49€/mois)';
+      default: return plan;
+    }
   };
 
   return (
@@ -49,15 +69,34 @@ export const AuthPage: React.FC = () => {
           </div>
 
           <h1 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-            Connexion / Inscription
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-2xl lg:text-3xl mt-2">
-              Accédez à votre dashboard personnalisé
-            </span>
+            {intentFromUrl === 'upgrade' && planFromUrl ? (
+              <>
+                Créez votre compte
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-2xl lg:text-3xl mt-2">
+                  Pour accéder au plan {getPlanDisplayName(planFromUrl)}
+                </span>
+              </>
+            ) : (
+              <>
+                Connexion / Inscription
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-2xl lg:text-3xl mt-2">
+                  Accédez à votre dashboard personnalisé
+                </span>
+              </>
+            )}
           </h1>
 
           <p className="text-xl text-blue-100 mb-12 leading-relaxed">
-            Créez un compte gratuit et accédez immédiatement à tous vos analytics.
-            Aucune carte de crédit requise pour commencer.
+            {intentFromUrl === 'upgrade' && planFromUrl ? (
+              <>
+                Créez d'abord votre compte gratuit, puis vous pourrez souscrire au plan {getPlanDisplayName(planFromUrl)} en toute sécurité.
+              </>
+            ) : (
+              <>
+                Créez un compte gratuit et accédez immédiatement à tous vos analytics.
+                Aucune carte de crédit requise pour commencer.
+              </>
+            )}
           </p>
 
           {/* Benefits */}
