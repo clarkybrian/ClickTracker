@@ -68,7 +68,7 @@ export const SubscriptionPage: React.FC = () => {
         'Support prioritaire'
       ],
       limitations: [],
-      stripePriceId: 'price_1QSn4SJYF9r3SjRw8yk8oWW8',
+      stripePriceId: 'price_1S0tHgBTb6wwJE5ou7JuBLcy',
       buttonText: subscription?.planType === 'pro' ? 'Plan actuel' : 'Passer au Pro',
       isCurrentPlan: subscription?.planType === 'pro'
     },
@@ -89,7 +89,7 @@ export const SubscriptionPage: React.FC = () => {
         'Rapports avancés'
       ],
       limitations: [],
-      stripePriceId: 'price_business',
+      stripePriceId: 'price_1S0tIGBTb6wwJE5ogGSDGyS5',
       buttonText: subscription?.planType === 'business' ? 'Plan actuel' : 'Passer au Business',
       isCurrentPlan: subscription?.planType === 'business'
     },
@@ -110,7 +110,7 @@ export const SubscriptionPage: React.FC = () => {
         'SLA garanti'
       ],
       limitations: [],
-      stripePriceId: 'price_enterprise',
+      stripePriceId: 'price_1S0tFoBTb6wwJE5oeYP0xRlZ',
       buttonText: subscription?.planType === 'enterprise' ? 'Plan actuel' : 'Passer à Enterprise',
       isCurrentPlan: subscription?.planType === 'enterprise'
     }

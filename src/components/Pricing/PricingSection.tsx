@@ -124,8 +124,8 @@ export const PricingSection: React.FC = () => {
         // Rediriger vers auth avec intention de payer le plan sélectionné
         navigate(`/auth?plan=${planName.toLowerCase()}&intent=upgrade`);
       } else {
-        // Si connecté, rediriger vers la page de pricing pour l'upgrade
-        navigate(`/pricing?plan=${planName.toLowerCase()}`);
+        // Si connecté, rediriger vers la page d'upgrade avec le plan sélectionné
+        navigate(`/upgrade?selectedPlan=${planName.toLowerCase()}`);
       }
     }
   };
