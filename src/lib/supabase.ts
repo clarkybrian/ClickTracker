@@ -7,10 +7,28 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+    storageKey: 'clicktracker-auth-token',
+    flowType: 'pkce'
   },
+  global: {
+    headers: {
+      'X-Client-Info': 'clicktracker-web'
+    }
+  }
 });
 
 export const getCurrentUser = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+      return null;
+    }
+    return user;
+  } catch (error) {
+    console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+    return null;
+  }
 };

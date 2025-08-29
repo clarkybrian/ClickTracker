@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
@@ -12,7 +12,7 @@ export const useAuth = () => {
   const [userTier, setUserTier] = useState<'free' | 'pro' | 'business'>('free');
 
   // Fonction pour récupérer le niveau d'abonnement de l'utilisateur
-  const fetchUserTier = async (userId: string) => {
+  const fetchUserTier = useCallback(async (userId: string): Promise<'free' | 'pro' | 'business'> => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -20,79 +20,157 @@ export const useAuth = () => {
         .eq('id', userId)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Erreur lors de la récupération du niveau d'abonnement:", error);
+        return 'pro'; // Par défaut 'pro' pour les tests
+      }
       
-      // Par défaut, on considère que l'utilisateur est 'pro' pour tester
-      // À ajuster selon votre structure de données
       return (data?.subscription_tier as 'free' | 'pro' | 'business') || 'pro';
     } catch (error) {
       console.error("Erreur lors de la récupération du niveau d'abonnement:", error);
-      return 'free';
+      return 'pro';
     }
-  };
+  }, []);
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user) {
-        const tier = await fetchUserTier(session.user.id);
-        setUserTier(tier);
-        setUser({ ...session.user, userTier: tier });
-      } else {
-        setUser(null);
+    let isMounted = true;
+    let isAuthInitialized = false;
+
+    const initAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Erreur de session:', error);
+          if (isMounted) {
+            setUser(null);
+            setUserTier('free');
+            setLoading(false);
+          }
+          return;
+        }
+
+        if (session?.user && isMounted) {
+          const tier = await fetchUserTier(session.user.id);
+          setUserTier(tier);
+          setUser({ ...session.user, userTier: tier });
+        } else if (isMounted) {
+          setUser(null);
+          setUserTier('free');
+        }
+
+        if (isMounted) {
+          setLoading(false);
+          isAuthInitialized = true;
+        }
+      } catch (error) {
+        console.error('Erreur d\'initialisation de l\'auth:', error);
+        if (isMounted) {
+          setUser(null);
+          setUserTier('free');
+          setLoading(false);
+          isAuthInitialized = true;
+        }
       }
-      
-      setLoading(false);
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (session?.user) {
-          const tier = await fetchUserTier(session.user.id);
-          setUserTier(tier);
-          setUser({ ...session.user, userTier: tier });
-        } else {
-          setUser(null);
+        if (!isMounted) return;
+
+        console.log('Auth state change:', event);
+
+        // Si l'auth n'est pas encore initialisée, on attend
+        if (!isAuthInitialized && event !== 'INITIAL_SESSION') {
+          return;
         }
-        setLoading(false);
+
+        try {
+          if (event === 'SIGNED_OUT') {
+            setUser(null);
+            setUserTier('free');
+            setLoading(false);
+          } else if (session?.user) {
+            const tier = await fetchUserTier(session.user.id);
+            setUserTier(tier);
+            setUser({ ...session.user, userTier: tier });
+            setLoading(false);
+          } else {
+            setUser(null);
+            setUserTier('free');
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error('Erreur lors du changement d\'état:', error);
+          if (isMounted) {
+            setLoading(false);
+          }
+        }
       }
     );
 
-    getSession();
+    initAuth();
 
-    return () => subscription.unsubscribe();
-  }, []);
+    // Timeout de sécurité pour éviter les chargements infinis
+    const timeoutId = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn('Timeout de chargement de l\'authentification');
+        setLoading(false);
+      }
+    }, 8000);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
+    };
+  }, [fetchUserTier]);
 
   const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    return { data, error };
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      return { data, error };
+    } catch (error) {
+      return { data: null, error };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { data, error };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { data, error };
+    } catch (error) {
+      return { data: null, error };
+    }
   };
 
   const signInWithGoogle = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`
-      }
-    });
-    return { data, error };
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+      return { data, error };
+    } catch (error) {
+      return { data: null, error };
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    try {
+      const { error } = await supabase.auth.signOut();
+      return { error };
+    } catch (error) {
+      return { error };
+    }
   };
 
   return {
