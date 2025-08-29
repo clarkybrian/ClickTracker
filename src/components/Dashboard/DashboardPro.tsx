@@ -3,8 +3,10 @@ import { useAuth } from '../../hooks/useAuth'
 import { useSubscription } from '../../hooks/useSubscription'
 import { supabase } from '../../lib/supabase'
 import { useNavigate } from 'react-router-dom'
+import SettingsModal from './SettingsModal'
 import { 
   Plus,
+  Settings,
   BarChart3, 
   Globe, 
   Smartphone,
@@ -45,6 +47,7 @@ export default function DashboardPro() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
 
   const limits = getLimits()
   const hasAccess = isPremium() || isEnterprise() || isPro() || isBusiness()
@@ -189,13 +192,23 @@ export default function DashboardPro() {
                 <div className="bg-purple-100 px-3 py-1 rounded-full">
                   <span className="text-purple-700 text-sm font-medium">Plan Pro</span>
                 </div>
-                <button 
-                  onClick={() => setShowCreateModal(true)}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-red-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-red-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>Créer un lien</span>
-                </button>
+                <div className="flex items-center space-x-3">
+                  <button 
+                    onClick={() => setShowCreateModal(true)}
+                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-red-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-red-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span>Créer un lien</span>
+                  </button>
+                  
+                  <button 
+                    onClick={() => setShowSettingsModal(true)}
+                    className="px-4 py-3 bg-white/80 backdrop-blur-sm border border-purple-200 text-purple-700 rounded-lg font-semibold hover:bg-white hover:border-purple-300 transition-all duration-300 flex items-center shadow-lg"
+                    title="Paramètres"
+                  >
+                    <Settings className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -405,6 +418,12 @@ export default function DashboardPro() {
           </div>
         </div>
       )}
+
+      {/* Modal de paramètres */}
+      <SettingsModal 
+        isOpen={showSettingsModal} 
+        onClose={() => setShowSettingsModal(false)} 
+      />
     </div>
   )
 }
