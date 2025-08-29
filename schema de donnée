@@ -1,0 +1,188 @@
+ERROR: 42P01: relation "profiles" does not exist
+LINE 35: JOIN profiles p ON l.user_id = p.id
+
+Attributs de la table user_profiles
+Champs obligatoires
+
+id : NULL (clé primaire auto-générée)
+uuid : text - Has a foreign key relation to auth.users.id
+email : text
+
+Champs optionnels
+
+full_name : text
+avatar_url : text
+timezone : text (Default: 'UTC'::text)
+subscription_tier : text (Default: 'free'::text)
+subscription_status : text (Default: 'active'::text)
+subscription_ends_at : timestamptz
+monthly_link_limit : int4 (Default: 100)
+monthly_clicks_limit : int4 (Default: 10000)
+custom_domains_limit : int4 (Default: 0)
+created_at : timestamptz (Default: now())
+updated_at : timestamptz (Default: now())
+last_login_at : timestamptz (Default: now())
+stripe_customer_id : text
+stripe_subscription_id : text
+stripe_price_id : text
+stripe_current_period_start : timestamptz
+stripe_current_period_end : timestamptz
+stripe_cancel_at_period_end : bool (Default: FALSE)
+
+
+Attributs de la table user_daily_stats
+Champs obligatoires
+
+id : uuid (Default: uuid_generate_v4())
+user_id : uuid - Has a foreign key relation to public.user_profiles.id
+date : date
+
+Champs optionnels
+
+total_clicks : int4 (Default: 0)
+unique_clicks : int4 (Default: 0)
+total_links : int4 (Default: 0)
+active_links : int4 (Default: 0)
+top_campaigns : jsonb (Default: '{}'::jsonb)
+top_links : jsonb (Default: '{}'::jsonb)
+created_at : timestamptz (Default: now())
+updated_at : timestamptz (Default: now())
+
+
+Attributs de la table stripe_events
+Champs obligatoires
+
+id : uuid (Default: uuid_generate_v4())
+stripe_event_id : text
+event_type : text
+
+Champs optionnels
+
+user_id : uuid - Has a foreign key relation to public.user_profiles.id
+stripe_customer_id : text
+stripe_subscription_id : text
+processed_at : timestamptz (Default: now())
+event_data : jsonb
+created_at : timestamptz (Default: now())
+
+Attributs de la table links
+Champs obligatoires
+
+id : uuid (Default: uuid_generate_v4())
+user_id : uuid - Has a foreign key relation to public.user_profiles.id
+original_url : text
+short_code : text
+
+Champs optionnels
+
+campaign_id : uuid - Has a foreign key relation to public.campaigns.id
+custom_domain_id : uuid - Has a foreign key relation to public.custom_domains.id
+title : text
+description : text
+favicon_url : text
+og_image_url : text
+is_active : bool (Default: TRUE)
+password_protected : bool (Default: FALSE)
+password_hash : text
+expires_at : timestamptz
+device_targeting : jsonb (Default: '{}'::jsonb)
+geo_targeting : jsonb (Default: '{}'::jsonb)
+utm_source : text
+utm_medium : text
+utm_campaign : text
+utm_term : text
+utm_content : text
+created_at : timestamptz (Default: now())
+updated_at : timestamptz (Default: now())
+
+Attributs de la table custom_domains
+Champs obligatoires
+
+id : uuid (Default: uuid_generate_v4())
+user_id : uuid - Has a foreign key relation to public.user_profiles.id
+domain : text
+
+Champs optionnels
+
+is_verified : bool (Default: FALSE)
+verification_token : text
+ssl_enabled : bool (Default: FALSE)
+dns_records : jsonb (Default: '{}'::jsonb)
+created_at : timestamptz (Default: now())
+verified_at : timestamptz
+
+
+table clicks :
+Champs obligatoires :
+
+id (uuid) - Clé primaire avec génération automatique
+link_id (uuid) - Clé étrangère vers public.links.id
+
+Champs optionnels :
+
+ip_address (inet)
+user_agent (text)
+referer (text)
+country_code (bpchar)
+country_name (text)
+region (text)
+city (text)
+latitude (numeric)
+longitude (numeric)
+timezone (text)
+browser_name (text)
+browser_version (text)
+os_name (text)
+os_version (text)
+device_type (text)
+device_brand (text)
+device_model (text)
+session_id (text)
+is_unique_visitor (bool) - Défaut : TRUE
+is_bot (bool) - Défaut : FALSE
+utm_source (text)
+utm_medium (text)
+utm_campaign (text)
+utm_term (text)
+utm_content (text)
+clicked_at (timestamptz) - Défaut : now()
+raw_data (jsonb)
+
+
+ campaigns :
+Champs obligatoires :
+
+id (uuid) - Clé primaire avec génération automatique
+user_id (uuid) - Clé étrangère vers public.user_profiles.id
+name (text)
+
+Champs optionnels :
+
+description (text)
+color (text) - Défaut : '#3B82F6'
+is_active (bool) - Défaut : TRUE
+tags (_text) - Type tableau de texte, défaut : '{}'
+created_at (timestamptz) - Défaut : now()
+updated_at (timestamptz) - Défaut : now()
+
+
+
+table link_daily_stats :
+Champs obligatoires :
+
+id (uuid) - Clé primaire avec génération automatique
+link_id (uuid) - Clé étrangère vers public.links.id
+date (date)
+
+Champs optionnels :
+
+total_clicks (int4) - Défaut : 0
+unique_clicks (int4) - Défaut : 0
+unique_visitors (int4) - Défaut : 0
+clicks_by_referer (jsonb)
+clicks_by_country (jsonb)
+clicks_by_device (jsonb)
+clicks_by_browser (jsonb)
+clicks_by_hour (jsonb)
+created_at (timestamptz) - Défaut : now()
+updated_at (timestamptz) - Défaut : now()

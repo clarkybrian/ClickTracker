@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link, User, LogOut, Menu, X } from 'lucide-react';
+import { Link, User, LogOut, Menu, X, Crown, Shield, Star } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useSubscription } from '../../hooks/useSubscription';
+import { NavLink } from 'react-router-dom';
 
 export const Header: React.FC = () => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { profile, isPro, isBusiness } = useSubscription();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Effet pour empêcher le scrolling quand le menu mobile est ouvert
@@ -47,8 +48,26 @@ export const Header: React.FC = () => {
   }, [isMobileMenuOpen]);
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    console.log('🔄 Déconnexion forcée en cours...');
+    
+    // Force immédiatement le nettoyage sans attendre Supabase
+    console.log('🧹 Nettoyage immédiat du localStorage...');
+    
+    // Nettoyer TOUT le localStorage
+    localStorage.clear();
+    
+    // Nettoyer le sessionStorage aussi
+    sessionStorage.clear();
+    
+    // Forcer la suppression des cookies Supabase
+    document.cookie.split(";").forEach(function(c) { 
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    
+    console.log('🏠 Redirection forcée...');
+    
+    // Redirection immédiate sans attendre
+    window.location.href = '/';
   };
 
   const toggleMobileMenu = () => {
@@ -57,6 +76,43 @@ export const Header: React.FC = () => {
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  // Composant pour afficher le badge d'abonnement
+  const SubscriptionBadge = () => {
+    if (!user || !profile) return null;
+
+    const getSubscriptionInfo = () => {
+      if (isBusiness()) {
+        return {
+          label: 'Business',
+          icon: Shield,
+          className: 'bg-purple-100 text-purple-700 border-purple-200'
+        };
+      }
+      if (isPro()) {
+        return {
+          label: 'Pro',
+          icon: Crown,
+          className: 'bg-yellow-100 text-yellow-700 border-yellow-200'
+        };
+      }
+      return {
+        label: 'Free',
+        icon: Star,
+        className: 'bg-gray-100 text-gray-700 border-gray-200'
+      };
+    };
+
+    const subscriptionInfo = getSubscriptionInfo();
+    const IconComponent = subscriptionInfo.icon;
+
+    return (
+      <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium border ${subscriptionInfo.className}`}>
+        <IconComponent className="w-3 h-3" />
+        <span>{subscriptionInfo.label}</span>
+      </div>
+    );
   };
 
   const navigationLinks = [
@@ -86,19 +142,22 @@ export const Header: React.FC = () => {
             {/* Navigation Desktop */}
             <nav className="ck-nav-desktop hidden lg:flex items-center space-x-2">
               {navigationLinks.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  className={({ isActive }) =>
-                    `ck-nav-link font-semibold px-4 py-2 rounded-lg transition-all duration-300 ${
-                      isActive
-                        ? 'bg-blue-100 text-blue-600'
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-100'
-                    }`
-                  }
-                >
-                  {link.label}
-                </NavLink>
+                <div key={link.to} className="flex items-center space-x-2">
+                  <NavLink
+                    to={link.to}
+                    className={({ isActive }) =>
+                      `ck-nav-link font-semibold px-4 py-2 rounded-lg transition-all duration-300 ${
+                        isActive
+                          ? 'bg-blue-100 text-blue-600'
+                          : 'text-gray-700 hover:text-blue-600 hover:bg-gray-100'
+                      }`
+                    }
+                  >
+                    {link.label}
+                  </NavLink>
+                  {/* Afficher le badge d'abonnement à côté du Dashboard */}
+                  {link.to === '/dashboard' && <SubscriptionBadge />}
+                </div>
               ))}
             </nav>
 
@@ -183,20 +242,27 @@ export const Header: React.FC = () => {
               {/* Navigation Links */}
               <nav className="ck-mobile-nav flex-1 px-6 py-4 space-y-2">
                 {navigationLinks.map((link) => (
-                  <NavLink
-                    key={link.to}
-                    to={link.to}
-                    onClick={closeMobileMenu}
-                    className={({ isActive }) =>
-                      `ck-mobile-nav-link block font-semibold px-4 py-3 rounded-lg transition-all duration-300 ${
-                        isActive
-                          ? 'bg-blue-100 text-blue-600 border-l-4 border-blue-600'
-                          : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                      }`
-                    }
-                  >
-                    {link.label}
-                  </NavLink>
+                  <div key={link.to} className="flex items-center justify-between">
+                    <NavLink
+                      to={link.to}
+                      onClick={closeMobileMenu}
+                      className={({ isActive }) =>
+                        `ck-mobile-nav-link block font-semibold px-4 py-3 rounded-lg transition-all duration-300 flex-1 ${
+                          isActive
+                            ? 'bg-blue-100 text-blue-600 border-l-4 border-blue-600'
+                            : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                        }`
+                      }
+                    >
+                      {link.label}
+                    </NavLink>
+                    {/* Afficher le badge d'abonnement à côté du Dashboard mobile */}
+                    {link.to === '/dashboard' && (
+                      <div className="ml-2">
+                        <SubscriptionBadge />
+                      </div>
+                    )}
+                  </div>
                 ))}
               </nav>
 

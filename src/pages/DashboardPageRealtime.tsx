@@ -12,7 +12,7 @@ export const DashboardPageRealtime: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-gray-50">
       {/* Indicateur Realtime */}
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-20 right-4 z-40">
         <div className="bg-white rounded-lg shadow-lg p-3 border-l-4 border-green-500">
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

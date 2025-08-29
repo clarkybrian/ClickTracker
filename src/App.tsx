@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Layout } from './components/Layout/Layout';
 import { ScrollToTop } from './components/ScrollToTop/ScrollToTop';
 import { HomePage } from './pages/HomePage';
-import { DashboardPageRealtime as DashboardPage } from './pages/DashboardPageRealtime';
+import DashboardRouter from './components/Dashboard/DashboardRouter';
 import { AuthPage } from './pages/AuthPage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import { PricingPage } from './pages/PricingPage';
@@ -71,7 +71,7 @@ function App() {
             path="dashboard" 
             element={
               <ProtectedRoute>
-                <DashboardPage />
+                <DashboardRouter />
               </ProtectedRoute>
             } 
           />

@@ -173,7 +173,7 @@ export const Dashboard: React.FC = () => {
                 Voici un aperçu de vos performances aujourd'hui
               </p>
             </div>
-            <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+            <div className="mt-4 sm:mt-0 flex items-center space-x-3 mr-8 md:mr-16 lg:mr-20">
               {hasReachedFreeLimit && (
                 <div className="hidden sm:flex items-center space-x-2 bg-orange-50 px-3 py-2 rounded-lg border border-orange-200">
                   <Crown className="w-4 h-4 text-orange-600" />
