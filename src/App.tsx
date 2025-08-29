@@ -10,6 +10,7 @@ import { PricingPage } from './pages/PricingPage';
 import { ContactPage } from './pages/ContactPage';
 import { ShortenPage } from './pages/ShortenPage';
 import { RedirectPage } from './pages/RedirectPage';
+import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { useAuth } from './hooks/useAuth';
 
 // Protected Route Component
@@ -58,6 +59,14 @@ function App() {
           <Route path="pricing" element={<PricingPage />} />
           <Route path="contact" element={<ContactPage />} />
           <Route path="auth" element={<AuthPage />} />
+          <Route 
+            path="payment-success" 
+            element={
+              <ProtectedRoute>
+                <PaymentSuccessPage />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="dashboard" 
             element={

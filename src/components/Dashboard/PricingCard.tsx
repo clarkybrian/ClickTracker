@@ -1,7 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Check, Crown, Zap } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export const PricingCard: React.FC = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleUpgrade = () => {
+    if (!user) {
+      navigate('/auth?intent=upgrade');
+      return;
+    }
+    // Rediriger vers la page de pricing pour choisir un plan
+    navigate('/pricing');
+  };
   return (
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-8">
@@ -101,7 +115,10 @@ export const PricingCard: React.FC = () => {
             </li>
           </ul>
 
-          <button className="w-full py-3 px-6 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+          <button 
+            onClick={handleUpgrade}
+            className="w-full py-3 px-6 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+          >
             Upgrade to Premium
           </button>
         </div>

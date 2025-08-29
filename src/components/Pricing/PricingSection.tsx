@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, X, Zap, BarChart3, Globe, Download, Crown, Shield, TrendingUp, Target } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { redirectToStripeCheckout } from '../../lib/stripe';
 
 const plans = [
   {
@@ -12,10 +13,10 @@ const plans = [
     icon: Zap,
     features: [
       { text: "Raccourcissement de liens", included: true },
-      { text: "1 lien actif seulement", included: true },
-      { text: "Clics totaux (24h)", included: true },
-      { text: "Pays principal des visiteurs", included: false },
-      { text: "Clics uniques vs totaux", included: false },
+      { text: "1 lien actif", included: true },
+      { text: "10 000 clics par mois", included: true },
+      { text: "1 domaine personnalisé", included: true },
+      { text: "Statistiques de base", included: true },
       { text: "Géolocalisation détaillée", included: false },
       { text: "Types d'appareils", included: false },
       { text: "Navigateurs utilisés", included: false },
@@ -37,15 +38,15 @@ const plans = [
     icon: Crown,
     features: [
       { text: "Raccourcissement de liens", included: true },
-      { text: "5 liens actifs", included: true },
-      { text: "Clics uniques vs totaux", included: true },
+      { text: "3 liens actifs", included: true },
+      { text: "100 000 clics par mois", included: true },
+      { text: "3 domaines personnalisés", included: true },
       { text: "Géolocalisation détaillée (pays/villes)", included: true },
       { text: "Types d'appareils (mobile/desktop)", included: true },
       { text: "Navigateurs utilisés", included: true },
       { text: "Sources de trafic", included: true },
-      { text: "Tracking temps réel", included: false },
-      { text: "Heures de pointe d'activité", included: false },
-      { text: "Export données avancé", included: false }
+      { text: "Statistiques avancées", included: true },
+      { text: "Export des données", included: true }
     ],
     buttonText: "Essayer Pro",
     buttonStyle: "bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-xl transform hover:-translate-y-1",
@@ -62,15 +63,15 @@ const plans = [
     icon: TrendingUp,
     features: [
       { text: "Raccourcissement de liens", included: true },
-      { text: "15 liens actifs", included: true },
+      { text: "5 liens actifs", included: true },
+      { text: "1 000 000 clics par mois", included: true },
+      { text: "5 domaines personnalisés", included: true },
       { text: "Tracking temps réel", included: true },
       { text: "Heures de pointe d'activité", included: true },
       { text: "Export données avancé", included: true },
       { text: "Liens personnalisés", included: true },
       { text: "QR codes personnalisés", included: true },
-      { text: "Statistiques comparatives", included: true },
-      { text: "Rapports automatisés", included: true },
-      { text: "API complète", included: false }
+      { text: "Rapports automatisés", included: true }
     ],
     buttonText: "Choisir Business",
     buttonStyle: "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-xl transform hover:-translate-y-1",
@@ -87,15 +88,15 @@ const plans = [
     icon: Target,
     features: [
       { text: "Raccourcissement de liens", included: true },
-      { text: "25 liens actifs", included: true },
+      { text: "12 liens actifs", included: true },
+      { text: "10 000 000 clics par mois", included: true },
+      { text: "12 domaines personnalisés", included: true },
       { text: "API complète + webhooks", included: true },
-      { text: "Multi-domaines personnalisés", included: true },
       { text: "Intégrations tierces", included: true },
       { text: "White-label complet", included: true },
       { text: "Analytics prédictives", included: true },
       { text: "Support dédié 24/7", included: true },
-      { text: "SLA 99.9% garanti", included: true },
-      { text: "Manager de compte", included: true }
+      { text: "Manager de compte dédié", included: true }
     ],
     buttonText: "Contacter les ventes",
     buttonStyle: "bg-gradient-to-r from-purple-600 to-indigo-700 text-white hover:shadow-xl transform hover:-translate-y-1",
@@ -110,7 +111,7 @@ export const PricingSection: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const handlePlanClick = (planName: string) => {
+  const handlePlanClick = async (planName: string) => {
     if (planName === "Starter") {
       // Pour le plan gratuit, rediriger selon l'état de connexion
       if (user) {
@@ -118,21 +119,30 @@ export const PricingSection: React.FC = () => {
       } else {
         navigate('/auth');
       }
-    } else if (planName === "Pro") {
-      // Plan Pro - 19€ - Redirection vers Stripe
-      window.open('https://buy.stripe.com/9B6bJ01Qa62A1Tw8pRcV200', '_blank');
-    } else if (planName === "Business") {
-      // Plan Business - 25€ - Redirection vers Stripe
-      window.open('https://buy.stripe.com/bJebJ09iC62AeGiaxZcV201', '_blank');
-    } else if (planName === "Enterprise") {
-      // Plan Enterprise - 49€ - Redirection vers Stripe
-      window.open('https://buy.stripe.com/cNi28qcuObmUfKm5dFcV202', '_blank');
     } else {
-      // Fallback pour les autres plans
-      if (user) {
-        navigate('/dashboard');
+      // Pour TOUS les plans payants (Pro, Business, Enterprise)
+      if (!user) {
+        // Si pas connecté, TOUJOURS rediriger vers auth
+        navigate(`/auth?plan=${planName.toLowerCase()}&intent=upgrade`);
       } else {
-        navigate('/auth');
+        // Si connecté, utiliser la nouvelle fonction avec email pré-rempli
+        try {
+          if (planName === "Pro") {
+            await redirectToStripeCheckout('pro', user.email || '', user.id);
+          } else if (planName === "Business") {
+            await redirectToStripeCheckout('business', user.email || '', user.id);
+          } else if (planName === "Enterprise") {
+            await redirectToStripeCheckout('enterprise', user.email || '', user.id);
+          }
+        } catch (error) {
+          console.error('Erreur lors de la redirection:', error);
+          // En cas d'erreur, fallback vers les Payment Links avec success_url
+          if (planName === "Pro") {
+            window.location.href = `https://buy.stripe.com/test_8x2cN454QdBP7B321k8Vi03?prefilled_email=${encodeURIComponent(user.email || '')}&success_url=${encodeURIComponent(window.location.origin + '/payment-success')}`;
+          } else if (planName === "Business") {
+            window.location.href = `https://buy.stripe.com/test_00w6oGapa9lz6wZdK28Vi04?prefilled_email=${encodeURIComponent(user.email || '')}&success_url=${encodeURIComponent(window.location.origin + '/payment-success')}`;
+          }
+        }
       }
     }
   };
