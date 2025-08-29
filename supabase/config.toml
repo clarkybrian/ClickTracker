@@ -1,0 +1,3 @@
+# Configuration pour permettre l'accès anonyme au webhook Stripe
+[functions.stripe-webhook]
+verify_jwt = false
