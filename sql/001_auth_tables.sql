@@ -1,7 +1,7 @@
 -- ================================================
 -- TABLES D'AUTHENTIFICATION ET UTILISATEURS
 -- ================================================
-
+ 
 -- Extension pour UUID
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
