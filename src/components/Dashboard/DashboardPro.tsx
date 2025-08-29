@@ -173,48 +173,99 @@ export default function DashboardPro() {
               </div>
             </div>
           </div>
-          
-          {/* Tabs Navigation */}
-          <div className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab('links')}
-              className={`flex items-center space-x-2 py-4 border-b-2 transition-colors ${
-                activeTab === 'links'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <LinkIcon className="w-5 h-5" />
-              <span className="font-medium">Mes liens</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className={`flex items-center space-x-2 py-4 border-b-2 transition-colors ${
-                activeTab === 'analytics'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <BarChart3 className="w-5 h-5" />
-              <span className="font-medium">Analytics</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('settings')}
-              className={`flex items-center space-x-2 py-4 border-b-2 transition-colors ${
-                activeTab === 'settings'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <Settings className="w-5 h-5" />
-              <span className="font-medium">Paramètres</span>
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main Content with Sidebar */}
+      <div className="flex flex-col md:flex-row max-w-7xl mx-auto">
+        {/* Desktop Sidebar Navigation */}
+        <div className="hidden md:block w-64 bg-white border-r border-gray-200 min-h-screen">
+          <div className="p-6">
+            <nav className="space-y-2">
+              <button
+                onClick={() => setActiveTab('links')}
+                className={`w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                  activeTab === 'links'
+                    ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <LinkIcon className="w-5 h-5" />
+                <span className="font-medium">Mes liens</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                  activeTab === 'analytics'
+                    ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="font-medium">Analytics</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                  activeTab === 'settings'
+                    ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Settings className="w-5 h-5" />
+                <span className="font-medium">Paramètres</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        <div className="md:hidden w-full bg-white border-b border-gray-200">
+          <div className="px-4 py-3">
+            <div className="flex space-x-1">
+              <button
+                onClick={() => setActiveTab('links')}
+                className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === 'links'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <LinkIcon className="w-4 h-4" />
+                <span>Liens</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === 'analytics'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span>Analytics</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === 'settings'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Settings className="w-4 h-4" />
+                <span>Paramètres</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'links' && (
           <div>
             <div className="mb-6">
@@ -261,6 +312,7 @@ export default function DashboardPro() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Modal de paramètres */}
