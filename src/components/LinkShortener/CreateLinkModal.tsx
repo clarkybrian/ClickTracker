@@ -40,6 +40,7 @@ export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showUtmOptions, setShowUtmOptions] = useState(false);
 
   const isPro = userTier === 'pro' || userTier === 'business';
 
@@ -133,8 +134,8 @@ export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
         utm_source: formData.utmSource || null,
         utm_medium: formData.utmMedium || null,
         utm_campaign: formData.utmCampaign || null,
-        is_private: formData.privateLink,
-        tracking_enabled: formData.enableTracking
+        is_private: formData.privateLink || false,
+        tracking_enabled: formData.enableTracking !== undefined ? formData.enableTracking : true
       };
 
       const { data: newLink, error: createError } = await supabase
@@ -351,42 +352,57 @@ export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
                     )}
                   </div>
 
-                  {/* UTM Parameters */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">UTM Source</label>
-                      <input
-                        type="text"
-                        value={formData.utmSource}
-                        onChange={(e) => setFormData({ ...formData, utmSource: e.target.value })}
-                        placeholder="google"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        disabled={loading}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">UTM Medium</label>
-                      <input
-                        type="text"
-                        value={formData.utmMedium}
-                        onChange={(e) => setFormData({ ...formData, utmMedium: e.target.value })}
-                        placeholder="email"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        disabled={loading}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-600 mb-1">UTM Campaign</label>
-                      <input
-                        type="text"
-                        value={formData.utmCampaign}
-                        onChange={(e) => setFormData({ ...formData, utmCampaign: e.target.value })}
-                        placeholder="summer2024"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        disabled={loading}
-                      />
-                    </div>
+                  {/* UTM Parameters - Hidden by default */}
+                  <div className="mb-2">
+                    <button 
+                      type="button"
+                      onClick={() => setShowUtmOptions(!showUtmOptions)}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                    >
+                      {showUtmOptions ? 'Masquer les paramètres UTM' : 'Configurer manuellement les paramètres UTM'} 
+                    </button>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Les paramètres UTM seront détectés automatiquement si vous ne les spécifiez pas.
+                    </p>
                   </div>
+                  
+                  {showUtmOptions && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">UTM Source</label>
+                        <input
+                          type="text"
+                          value={formData.utmSource}
+                          onChange={(e) => setFormData({ ...formData, utmSource: e.target.value })}
+                          placeholder="google"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          disabled={loading}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">UTM Medium</label>
+                        <input
+                          type="text"
+                          value={formData.utmMedium}
+                          onChange={(e) => setFormData({ ...formData, utmMedium: e.target.value })}
+                          placeholder="email"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          disabled={loading}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">UTM Campaign</label>
+                        <input
+                          type="text"
+                          value={formData.utmCampaign}
+                          onChange={(e) => setFormData({ ...formData, utmCampaign: e.target.value })}
+                          placeholder="summer2024"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                          disabled={loading}
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Options de tracking */}
                   <div className="space-y-2">

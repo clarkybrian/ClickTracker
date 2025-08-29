@@ -71,7 +71,15 @@ export const useLinks = (userId: string | undefined) => {
           description,
           is_active,
           created_at,
-          updated_at
+          updated_at,
+          expires_at,
+          password_protected,
+          password_hash,
+          utm_source,
+          utm_medium,
+          utm_campaign,
+          is_private,
+          tracking_enabled
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -87,7 +95,8 @@ export const useLinks = (userId: string | undefined) => {
             ...link,
             full_short_url: `${window.location.origin}/r/${link.short_code}`,
             ...stats,
-            is_private: false // Valeur par défaut
+            is_private: link.is_private || false, // Utiliser la valeur de la BD ou false par défaut
+            tracking_enabled: link.tracking_enabled !== undefined ? link.tracking_enabled : true // Utiliser la valeur de la BD ou true par défaut
           };
         })
       );

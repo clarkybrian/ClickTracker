@@ -2,20 +2,59 @@ import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
+type UserWithTier = User & {
+  userTier?: 'free' | 'pro' | 'business';
+};
+
 export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserWithTier | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userTier, setUserTier] = useState<'free' | 'pro' | 'business'>('free');
+
+  // Fonction pour récupérer le niveau d'abonnement de l'utilisateur
+  const fetchUserTier = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('subscription_tier')
+        .eq('id', userId)
+        .single();
+      
+      if (error) throw error;
+      
+      // Par défaut, on considère que l'utilisateur est 'pro' pour tester
+      // À ajuster selon votre structure de données
+      return (data?.subscription_tier as 'free' | 'pro' | 'business') || 'pro';
+    } catch (error) {
+      console.error("Erreur lors de la récupération du niveau d'abonnement:", error);
+      return 'free';
+    }
+  };
 
   useEffect(() => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        const tier = await fetchUserTier(session.user.id);
+        setUserTier(tier);
+        setUser({ ...session.user, userTier: tier });
+      } else {
+        setUser(null);
+      }
+      
       setLoading(false);
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
+      async (event, session) => {
+        if (session?.user) {
+          const tier = await fetchUserTier(session.user.id);
+          setUserTier(tier);
+          setUser({ ...session.user, userTier: tier });
+        } else {
+          setUser(null);
+        }
         setLoading(false);
       }
     );
@@ -59,6 +98,7 @@ export const useAuth = () => {
   return {
     user,
     loading,
+    userTier,
     signUp,
     signIn,
     signInWithGoogle,

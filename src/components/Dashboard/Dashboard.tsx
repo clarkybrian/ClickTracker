@@ -29,15 +29,16 @@ interface DashboardStats {
 }
 
 export const Dashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user, userTier } = useAuth();
   const navigate = useNavigate();
+  
   const { 
     links, 
     loading: linksLoading, 
-    hasReachedFreeLimit, 
+    hasReachedLimit, 
     remainingLinks,
     addLink 
-  } = useLinks(user?.id);
+  } = useLinks(user?.id, userTier);
   
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,8 +55,15 @@ export const Dashboard: React.FC = () => {
   };
 
   const handleLinkCreated = (newLink: Link) => {
-    addLink(newLink);
-    setCreatedLink(newLink);
+    // Assurez-vous que le nouveau lien contient tous les champs nécessaires
+    const completeLink: Link = {
+      ...newLink,
+      is_private: newLink.is_private || false,
+      tracking_enabled: newLink.tracking_enabled !== undefined ? newLink.tracking_enabled : true
+    };
+    
+    addLink(completeLink);
+    setCreatedLink(completeLink);
     setShowCreateModal(false);
     setShowSuccessModal(true);
   };
@@ -530,8 +538,9 @@ export const Dashboard: React.FC = () => {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onLinkCreated={handleLinkCreated}
-        hasReachedLimit={hasReachedFreeLimit}
+        hasReachedLimit={hasReachedLimit}
         onUpgradeRequired={handleUpgradeRequired}
+        userTier={userTier}
       />
 
       {createdLink && (

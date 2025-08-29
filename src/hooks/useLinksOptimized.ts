@@ -33,7 +33,8 @@ export const useLinksOptimized = (userId: string | undefined) => {
       const linksWithFullUrl = (data || []).map(link => ({
         ...link,
         full_short_url: `${window.location.origin}/r/${link.short_code}`,
-        is_private: false // Valeur par défaut
+        is_private: link.is_private || false, // Utiliser la valeur de la BD ou false par défaut
+        tracking_enabled: link.tracking_enabled !== undefined ? link.tracking_enabled : true // Utiliser la valeur de la BD ou true par défaut
       }));
 
       setLinks(linksWithFullUrl);

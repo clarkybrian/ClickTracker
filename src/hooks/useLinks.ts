@@ -2,13 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { Link } from '../types';
 
-export const useLinks = (userId: string | undefined) => {
+export const useLinks = (userId: string | undefined, userTier: 'free' | 'pro' | 'business' = 'free') => {
   const [links, setLinks] = useState<Link[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Limite gratuite : 1 lien
+  // Limites par niveau d'abonnement
   const FREE_LINK_LIMIT = 1;
+  const PRO_LINK_LIMIT = 100;
+  const BUSINESS_LINK_LIMIT = 1000;
 
   const fetchLinks = useCallback(async () => {
     if (!userId) {
@@ -30,7 +32,15 @@ export const useLinks = (userId: string | undefined) => {
           description,
           is_active,
           created_at,
-          updated_at
+          updated_at,
+          expires_at,
+          password_protected,
+          password_hash,
+          utm_source,
+          utm_medium,
+          utm_campaign,
+          is_private,
+          tracking_enabled
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -60,7 +70,8 @@ export const useLinks = (userId: string | undefined) => {
           full_short_url: `${window.location.origin}/r/${link.short_code}`,
           total_clicks: totalClicks || 0,
           unique_clicks: uniqueClicks,
-          is_private: false // Valeur par défaut
+          is_private: link.is_private || false, // Utiliser la valeur de la BD ou false par défaut
+          tracking_enabled: link.tracking_enabled !== undefined ? link.tracking_enabled : true // Utiliser la valeur de la BD ou true par défaut
         };
       }));
 
@@ -146,14 +157,26 @@ export const useLinks = (userId: string | undefined) => {
     }
   };
 
-  // Vérifier si l'utilisateur a atteint la limite gratuite
-  const hasReachedFreeLimit = () => {
-    return links.length >= FREE_LINK_LIMIT;
+  // Vérifier si l'utilisateur a atteint la limite de son abonnement
+  const hasReachedLimit = () => {
+    if (userTier === 'pro') {
+      return links.length >= PRO_LINK_LIMIT;
+    } else if (userTier === 'business') {
+      return links.length >= BUSINESS_LINK_LIMIT;
+    } else {
+      return links.length >= FREE_LINK_LIMIT;
+    }
   };
 
-  // Obtenir le nombre de liens restants
+  // Obtenir le nombre de liens restants selon l'abonnement
   const getRemainingLinks = () => {
-    return Math.max(0, FREE_LINK_LIMIT - links.length);
+    if (userTier === 'pro') {
+      return Math.max(0, PRO_LINK_LIMIT - links.length);
+    } else if (userTier === 'business') {
+      return Math.max(0, BUSINESS_LINK_LIMIT - links.length);
+    } else {
+      return Math.max(0, FREE_LINK_LIMIT - links.length);
+    }
   };
 
   return {
@@ -166,8 +189,8 @@ export const useLinks = (userId: string | undefined) => {
     addLink,
     updateLink,
     refetch: fetchLinks,
-    hasReachedFreeLimit: hasReachedFreeLimit(),
+    hasReachedLimit: hasReachedLimit(),
     remainingLinks: getRemainingLinks(),
-    freeLimit: FREE_LINK_LIMIT
+    currentTier: userTier
   };
 };
