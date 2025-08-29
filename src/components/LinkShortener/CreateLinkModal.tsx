@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Link, Globe, Tag } from 'lucide-react';
+import { X, Link, Globe, Tag, Calendar, Shield, BarChart3, Target, Zap } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { Link as LinkType } from '../../types';
@@ -10,6 +10,7 @@ interface CreateLinkModalProps {
   onLinkCreated: (link: LinkType) => void;
   hasReachedLimit: boolean;
   onUpgradeRequired: () => void;
+  userTier?: 'free' | 'pro' | 'business';
 }
 
 export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
@@ -17,19 +18,41 @@ export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
   onClose,
   onLinkCreated,
   hasReachedLimit,
-  onUpgradeRequired
+  onUpgradeRequired,
+  userTier = 'free'
 }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     originalUrl: '',
     customAlias: '',
     title: '',
-    description: ''
+    description: '',
+    // Nouvelles fonctionnalités Pro
+    expiresAt: '',
+    passwordProtected: false,
+    password: '',
+    utmSource: '',
+    utmMedium: '',
+    utmCampaign: '',
+    enableTracking: true,
+    privateLink: false
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const isPro = userTier === 'pro' || userTier === 'business';
 
   if (!isOpen) return null;
+
+  // Fonction simple de hashage pour les mots de passe (à remplacer par bcrypt en production)
+  const hashPassword = async (password: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
 
   const generateShortCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -95,17 +118,28 @@ export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
         }
       }
 
-      // Créer le lien dans Supabase
+      // Créer le lien dans Supabase avec toutes les nouvelles fonctionnalités
+      const linkData = {
+        user_id: user?.id,
+        original_url: normalizedUrl,
+        short_code: shortCode,
+        title: formData.title || null,
+        description: formData.description || null,
+        is_active: true,
+        // Nouvelles fonctionnalités Pro
+        expires_at: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : null,
+        password_protected: formData.passwordProtected,
+        password_hash: formData.passwordProtected ? await hashPassword(formData.password) : null,
+        utm_source: formData.utmSource || null,
+        utm_medium: formData.utmMedium || null,
+        utm_campaign: formData.utmCampaign || null,
+        is_private: formData.privateLink,
+        tracking_enabled: formData.enableTracking
+      };
+
       const { data: newLink, error: createError } = await supabase
         .from('links')
-        .insert({
-          user_id: user?.id,
-          original_url: normalizedUrl,
-          short_code: shortCode,
-          title: formData.title || null,
-          description: formData.description || null,
-          is_active: true
-        })
+        .insert(linkData)
         .select('*')
         .single();
 
@@ -128,7 +162,15 @@ export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
         originalUrl: '',
         customAlias: '',
         title: '',
-        description: ''
+        description: '',
+        expiresAt: '',
+        passwordProtected: false,
+        password: '',
+        utmSource: '',
+        utmMedium: '',
+        utmCampaign: '',
+        enableTracking: true,
+        privateLink: false
       });
 
     } catch (err: unknown) {
@@ -250,6 +292,135 @@ export const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
               disabled={loading || hasReachedLimit}
             />
           </div>
+
+          {/* Fonctionnalités Pro */}
+          {isPro && (
+            <div className="space-y-6">
+              {/* En-tête des fonctionnalités avancées */}
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium text-gray-900">Fonctionnalités Premium</h4>
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                >
+                  {showAdvanced ? 'Masquer' : 'Afficher'}
+                </button>
+              </div>
+
+              {showAdvanced && (
+                <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  {/* Date d'expiration */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Date d'expiration (optionnelle)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={formData.expiresAt}
+                      onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {/* Protection par mot de passe */}
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="passwordProtected"
+                        checked={formData.passwordProtected}
+                        onChange={(e) => setFormData({ ...formData, passwordProtected: e.target.checked })}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        disabled={loading}
+                      />
+                      <label htmlFor="passwordProtected" className="text-sm font-medium text-gray-700">
+                        Protéger par mot de passe
+                      </label>
+                    </div>
+                    {formData.passwordProtected && (
+                      <input
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="Mot de passe requis"
+                        className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        disabled={loading}
+                      />
+                    )}
+                  </div>
+
+                  {/* UTM Parameters */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">UTM Source</label>
+                      <input
+                        type="text"
+                        value={formData.utmSource}
+                        onChange={(e) => setFormData({ ...formData, utmSource: e.target.value })}
+                        placeholder="google"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">UTM Medium</label>
+                      <input
+                        type="text"
+                        value={formData.utmMedium}
+                        onChange={(e) => setFormData({ ...formData, utmMedium: e.target.value })}
+                        placeholder="email"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        disabled={loading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">UTM Campaign</label>
+                      <input
+                        type="text"
+                        value={formData.utmCampaign}
+                        onChange={(e) => setFormData({ ...formData, utmCampaign: e.target.value })}
+                        placeholder="summer2024"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Options de tracking */}
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="enableTracking"
+                        checked={formData.enableTracking}
+                        onChange={(e) => setFormData({ ...formData, enableTracking: e.target.checked })}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        disabled={loading}
+                      />
+                      <label htmlFor="enableTracking" className="text-sm font-medium text-gray-700">
+                        Activer le tracking détaillé
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="privateLink"
+                        checked={formData.privateLink}
+                        onChange={(e) => setFormData({ ...formData, privateLink: e.target.checked })}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        disabled={loading}
+                      />
+                      <label htmlFor="privateLink" className="text-sm font-medium text-gray-700">
+                        Lien privé (non listé)
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Erreur */}
           {error && (

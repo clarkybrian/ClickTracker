@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, X, Zap, BarChart3, Globe, Download, Crown, Shield, TrendingUp, Target } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useSubscription } from '../../hooks/useSubscription';
 import { redirectToStripeCheckout } from '../../lib/stripe';
 
 const plans = [
@@ -110,8 +111,59 @@ const plans = [
 export const PricingSection: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { profile } = useSubscription();
+
+  // Fonction pour déterminer si un plan est désactivé
+  const isPlanDisabled = (planName: string) => {
+    if (!profile) return false;
+    
+    const currentTier = profile.subscription_tier;
+    const planLower = planName.toLowerCase();
+    
+    // Si l'utilisateur a un plan gratuit, aucun plan n'est désactivé
+    if (currentTier === 'free') return false;
+    
+    // Si l'utilisateur a un plan pro, désactiver free et pro
+    if (currentTier === 'pro') {
+      return planLower === 'starter' || planLower === 'pro';
+    }
+    
+    // Si l'utilisateur a un plan business, désactiver free et business
+    if (currentTier === 'business') {
+      return planLower === 'starter' || planLower === 'business';
+    }
+    
+    return false;
+  };
+
+  // Fonction pour obtenir le texte du bouton selon l'état
+  const getButtonText = (planName: string, originalText: string) => {
+    if (!profile) return originalText;
+    
+    const currentTier = profile.subscription_tier;
+    const planLower = planName.toLowerCase();
+    
+    // Si c'est le plan actuel
+    if ((currentTier === 'free' && planLower === 'starter') ||
+        (currentTier === 'pro' && planLower === 'pro') ||
+        (currentTier === 'business' && planLower === 'business')) {
+      return 'Plan actuel';
+    }
+    
+    // Si le plan est inférieur au plan actuel
+    if (isPlanDisabled(planName)) {
+      return 'Indisponible';
+    }
+    
+    return originalText;
+  };
 
   const handlePlanClick = async (planName: string) => {
+    // Si le plan est désactivé, ne rien faire
+    if (isPlanDisabled(planName)) {
+      return;
+    }
+    
     if (planName === "Starter") {
       // Pour le plan gratuit, rediriger selon l'état de connexion
       if (user) {
@@ -165,18 +217,27 @@ export const PricingSection: React.FC = () => {
         <div className="ck-pricing-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-6">
           {plans.map((plan, index) => {
             const IconComponent = plan.icon;
+            const isDisabled = isPlanDisabled(plan.name);
+            const isCurrentPlan = profile && (
+              (profile.subscription_tier === 'free' && plan.name === 'Starter') ||
+              (profile.subscription_tier === 'pro' && plan.name === 'Pro') ||
+              (profile.subscription_tier === 'business' && plan.name === 'Business')
+            );
+            
             return (
               <div
                 key={index}
-                className={`ck-pricing-card relative bg-white rounded-2xl shadow-xl border-2 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
-                  plan.popular 
-                    ? 'border-blue-500 lg:scale-105 order-1 lg:order-none' 
+                className={`ck-pricing-card relative rounded-2xl shadow-xl border-2 transition-all duration-300 ${
+                  isDisabled || isCurrentPlan
+                    ? 'bg-gray-50 border-gray-300 opacity-60'
+                    : plan.popular 
+                    ? 'bg-white border-blue-500 lg:scale-105 order-1 lg:order-none hover:shadow-2xl hover:-translate-y-2' 
                     : plan.badge?.includes('valeur')
-                    ? 'border-green-500 lg:scale-102 order-2 lg:order-none'
-                    : 'border-gray-200'
+                    ? 'bg-white border-green-500 lg:scale-102 order-2 lg:order-none hover:shadow-2xl hover:-translate-y-2'
+                    : 'bg-white border-gray-200 hover:shadow-2xl hover:-translate-y-2'
                 }`}
               >
-                {plan.badge && (
+                {plan.badge && !isDisabled && !isCurrentPlan && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                     <div className={`text-white px-3 py-1 rounded-full text-xs font-semibold ${
                       plan.popular 
@@ -186,6 +247,14 @@ export const PricingSection: React.FC = () => {
                         : 'bg-gradient-to-r from-purple-600 to-indigo-700'
                     }`}>
                       {plan.badge}
+                    </div>
+                  </div>
+                )}
+
+                {isCurrentPlan && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                      ✓ Plan actuel
                     </div>
                   </div>
                 )}
@@ -248,9 +317,16 @@ export const PricingSection: React.FC = () => {
                   {/* CTA Button */}
                   <button 
                     onClick={() => handlePlanClick(plan.name)}
-                    className={`ck-pricing-btn w-full py-2 md:py-3 px-3 md:px-4 rounded-lg font-semibold text-sm md:text-base transition-all duration-300 ${plan.buttonStyle}`}
+                    disabled={isDisabled || !!isCurrentPlan}
+                    className={`ck-pricing-btn w-full py-2 md:py-3 px-3 md:px-4 rounded-lg font-semibold text-sm md:text-base transition-all duration-300 ${
+                      isDisabled 
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : isCurrentPlan
+                        ? 'bg-green-100 text-green-700 cursor-default'
+                        : plan.buttonStyle
+                    }`}
                   >
-                    {plan.buttonText}
+                    {getButtonText(plan.name, plan.buttonText)}
                   </button>
                 </div>
 

@@ -1,14 +1,37 @@
 import React, { useState } from 'react';
-import { Link, Copy, Check, Zap, BarChart, Globe } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { Link, Copy, Check, Zap, BarChart, Globe, Plus } from 'lucide-react';
+import { CreateLinkModal } from './CreateLinkModal';
+import { useAuth } from '../../hooks/useAuth';
+import { useSubscription } from '../../hooks/useSubscription';
+import { useLinks } from '../../hooks/useLinks';
+import { Link as LinkType } from '../../types';
 
 export const LinkShortener: React.FC = () => {
-  const [url, setUrl] = useState('');
-  const [customAlias, setCustomAlias] = useState('');
-  const [shortUrl, setShortUrl] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
+  const { user } = useAuth();
+  const { tier } = useSubscription();
+  const { links, hasReachedFreeLimit } = useLinks(user?.id);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const handleLinkCreated = (newLink: LinkType) => {
+    console.log('Nouveau lien créé:', newLink);
+    // Le hook useLinks se mettra à jour automatiquement
+  };
+
+  const handleUpgradeRequired = () => {
+    // Redirection vers la page pricing
+    window.location.href = '/pricing';
+  };
+
+  const copyToClipboard = async (text: string, linkId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(linkId);
+      setTimeout(() => setCopied(null), 2000);
+    } catch (err) {
+      console.error('Erreur lors de la copie:', err);
+    }
+  };
 
   const generateShortCode = (): string => {
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

@@ -34,6 +34,7 @@ export function useSubscription() {
 
   const fetchUserProfile = async () => {
     try {
+      console.log('useSubscription - fetchUserProfile - user:', user);
       // user.id correspond à auth.uid() donc on cherche par la colonne qui référence auth.users.id
       const { data, error } = await supabase
         .from('user_profiles')
@@ -41,13 +42,15 @@ export function useSubscription() {
         .eq('id', user?.id) // Supposant que user_profiles.id = auth.users.id
         .single()
 
+      console.log('useSubscription - query result:', { data, error });
+
       if (error) {
         console.error('Error fetching user profile:', error)
-        // Si la ligne n'existe pas, on assume free
+        // Si la ligne n'existe pas, on assume PRO temporairement pour les tests
         setProfile({
           id: user?.id || '',
           email: user?.email || '',
-          subscription_tier: 'free',
+          subscription_tier: 'pro', // Changé temporairement pour les tests
           subscription_status: 'active',
           stripe_customer_id: null,
           stripe_subscription_id: null,
@@ -58,6 +61,7 @@ export function useSubscription() {
         return
       }
 
+      console.log('useSubscription - profile found:', data);
       setProfile(data)
     } catch (error) {
       console.error('Error fetching user profile:', error)

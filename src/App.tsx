@@ -75,6 +75,12 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="pro" 
+            element={
+              <Navigate to="/dashboard" replace />
+            } 
+          />
           {/* Catch all route - redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
