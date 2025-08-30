@@ -8,6 +8,7 @@ export const Header: React.FC = () => {
   const { user } = useAuth();
   const { profile, isPro, isBusiness } = useSubscription();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
 
   // Effet pour empêcher le scrolling quand le menu mobile est ouvert
   useEffect(() => {
@@ -46,6 +47,53 @@ export const Header: React.FC = () => {
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isMobileMenuOpen]);
+
+  // Effet pour la détection de la souris pour l'auto-hide header
+  useEffect(() => {
+    let hideTimer: NodeJS.Timeout | null = null;
+
+    const handleMouseMove = (event: MouseEvent) => {
+      // Afficher le header si la souris est dans les 80px du haut
+      if (event.clientY <= 80) {
+        setIsHeaderVisible(true);
+        // Annuler le timer de masquage s'il existe
+        if (hideTimer) {
+          clearTimeout(hideTimer);
+          hideTimer = null;
+        }
+      } else {
+        // Masquer le header après 300ms si la souris quitte la zone
+        if (!hideTimer) {
+          hideTimer = setTimeout(() => {
+            setIsHeaderVisible(false);
+            hideTimer = null;
+          }, 300);
+        }
+      }
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      if (hideTimer) {
+        clearTimeout(hideTimer);
+      }
+    };
+  }, []);
+
+  // Effet pour ajouter/retirer la classe sur le body quand le header est visible
+  useEffect(() => {
+    if (isHeaderVisible) {
+      document.body.classList.add('header-visible');
+    } else {
+      document.body.classList.remove('header-visible');
+    }
+
+    return () => {
+      document.body.classList.remove('header-visible');
+    };
+  }, [isHeaderVisible]);
 
   const handleSignOut = async () => {
     console.log('🔄 Déconnexion forcée en cours...');
@@ -126,7 +174,13 @@ export const Header: React.FC = () => {
 
   return (
     <>
-      <header className="ck-header bg-white/95 backdrop-blur-md shadow-xl border-b border-gray-200 sticky top-0 z-50">
+      {/* Zone de détection invisible en haut de la page */}
+      <div className="fixed top-0 left-0 right-0 h-20 z-40 pointer-events-none" />
+      
+      {/* Header avec animation de glissement */}
+      <header className={`ck-header bg-white/95 backdrop-blur-md shadow-xl border-b border-gray-200 fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${
+        isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}

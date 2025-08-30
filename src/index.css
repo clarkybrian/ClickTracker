@@ -90,6 +90,41 @@
   }
 }
 
+/* Animations pour le header auto-cachant */
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+.header-slide-down {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.header-slide-up {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+.header-compensation {
+  padding-top: 80px; /* Ajuste selon la hauteur de ton header */
+}
+
 .animate-scroll-infinite {
   animation: scroll-infinite 30s linear infinite;
 }
@@ -117,6 +152,44 @@
 .overflow-safe {
   max-width: 100%;
   overflow-x: hidden;
+}
+
+/* Styles pour le header auto-masquant */
+.ck-header {
+  will-change: transform;
+}
+
+/* Animation smooth pour le header */
+.ck-header.slide-down {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.ck-header.slide-up {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+/* Assurer que la page ne "saute" pas quand le header disparaît */
+.header-compensation {
+  padding-top: 0;
+  transition: padding-top 0.3s ease-in-out;
 }
 
 @keyframes drift {
@@ -700,6 +773,37 @@ body.mobile-menu-open {
 
 .ck-main {
   flex: 1;
+  padding-top: 0; /* Par défaut, pas de padding pour que le Dashboard remonte */
+  transition: padding-top 0.3s ease-in-out; /* Animation fluide */
+}
+
+/* Quand le header est visible, ajouter le padding */
+body.header-visible .ck-main {
+  padding-top: 80px;
+}
+
+/* Style spécifique pour les pages Dashboard - Override complet */
+.dashboard-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 100vh;
+  transition: top 0.3s ease-in-out;
+}
+
+body.header-visible .dashboard-page {
+  top: 80px; /* Descend de la hauteur du header quand il est visible */
+}
+
+/* Ajustement de l'indicateur Realtime pour coller en haut */
+.dashboard-page .fixed.top-20 {
+  top: 1rem; /* Par défaut, colle tout en haut */
+  transition: top 0.3s ease-in-out;
+}
+
+body.header-visible .dashboard-page .fixed.top-20 {
+  top: 6rem; /* Descend quand le header est visible */
 }
 
 .ck-footer {

@@ -3,7 +3,7 @@ import { Dashboard } from '../components/Dashboard/Dashboard';
 
 export const DashboardPage: React.FC = () => {
   return (
-    <div className="relative min-h-screen bg-gray-50">
+    <div className="dashboard-page relative min-h-screen bg-gray-50">
       {/* Background avec vagues et formes géométriques */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Grille subtile */}

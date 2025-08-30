@@ -10,7 +10,7 @@ export const DashboardPageRealtime: React.FC = () => {
   console.log('🔄 Dashboard Realtime - Links:', links.length, 'Loading:', loading);
 
   return (
-    <div className="relative min-h-screen bg-gray-50">
+    <div className="dashboard-page relative min-h-screen bg-gray-50">
       {/* Indicateur Realtime */}
       <div className="fixed top-20 right-4 z-40">
         <div className="bg-white rounded-lg shadow-lg p-3 border-l-4 border-green-500">
