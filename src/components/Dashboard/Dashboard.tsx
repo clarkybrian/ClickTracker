@@ -1,555 +1,288 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
-import { useLinks } from '../../hooks/useLinks';
-import { useNavigate } from 'react-router-dom';
-import { CreateLinkModal } from '../LinkShortener/CreateLinkModal';
-import { LinkSuccessModal } from '../LinkShortener/LinkSuccessModal';
-import { Link } from '../../types';
+import { useState, useEffect } from 'react'
+import { useAuth } from '../../hooks/useAuth'
+import { useSubscription } from '../../hooks/useSubscription'
+import { supabase } from '../../lib/supabase'
+import { useNavigate } from 'react-router-dom'
+import SettingsModal from './SettingsModal'
+import { LinkShortener } from '../../components/LinkShortener/LinkShortener'
 import { 
+  Settings,
   BarChart3, 
-  TrendingUp, 
-  Users, 
-  Globe, 
-  Plus, 
-  Copy,
-  Edit3,
-  Trash2,
-  Search,
-  Eye,
-  Crown
-} from 'lucide-react';
+  Link as LinkIcon,
+  Zap
+} from 'lucide-react'
 
-interface DashboardStats {
-  total_links: number;
-  total_clicks: number;
-  unique_visitors: number;
-  clicks_today: number;
-  clicks_this_week: number;
-  clicks_this_month: number;
+interface Link {
+  id: string
+  title: string
+  short_code: string
+  original_url: string
+  created_at: string
+  user_id: string
+  updated_at: string
+  click_count: number
 }
 
-export const Dashboard: React.FC = () => {
-  const { user, userTier } = useAuth();
-  const navigate = useNavigate();
+export default function Dashboard() {
+  const { user } = useAuth()
+  const { getLimits } = useSubscription()
+  const navigate = useNavigate()
+  const [links, setLinks] = useState<Link[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+
+  const limits = getLimits()
   
-  const { 
-    links, 
-    loading: linksLoading, 
-    hasReachedLimit, 
-    remainingLinks,
-    addLink 
-  } = useLinks(user?.id, userTier);
-  
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPeriod, setSelectedPeriod] = useState('7d');
-  
-  // Modal states
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [createdLink, setCreatedLink] = useState<Link | null>(null);
+  // État pour la gestion des onglets
+  const [activeTab, setActiveTab] = useState<'links' | 'analytics' | 'settings'>('links')
 
-  const handleCreateLink = () => {
-    setShowCreateModal(true);
-  };
+  const fetchLinks = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('links')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
 
-  const handleLinkCreated = (newLink: Link) => {
-    // Assurez-vous que le nouveau lien contient tous les champs nécessaires
-    const completeLink: Link = {
-      ...newLink,
-      is_private: newLink.is_private || false,
-      tracking_enabled: newLink.tracking_enabled !== undefined ? newLink.tracking_enabled : true
-    };
-    
-    addLink(completeLink);
-    setCreatedLink(completeLink);
-    setShowCreateModal(false);
-    setShowSuccessModal(true);
-  };
-
-  const handleUpgradeRequired = () => {
-    setShowCreateModal(false);
-    navigate('/pricing');
-  };
-
-  // Mock data - à remplacer par de vraies données depuis Supabase
-  useEffect(() => {
-    const mockStats: DashboardStats = {
-      total_links: 23,
-      total_clicks: 1847,
-      unique_visitors: 892,
-      clicks_today: 127,
-      clicks_this_week: 645,
-      clicks_this_month: 1847
-    };
-
-    const mockLinks: Link[] = [
-      {
-        id: '1',
-        original_url: 'https://www.example.com/article-marketing-digital',
-        short_code: 'mkt2024',
-        full_short_url: 'https://clicktracker.app/mkt2024',
-        title: 'Guide Marketing Digital 2024',
-        total_clicks: 342,
-        unique_clicks: 256,
-        last_clicked_at: '2024-08-27T10:30:00Z',
-        created_at: '2024-08-20T14:22:00Z',
-        is_active: true
-      },
-      {
-        id: '2',
-        original_url: 'https://shop.example.com/promo-summer',
-        short_code: 'summer24',
-        full_short_url: 'https://clicktracker.app/summer24',
-        title: 'Promotion Été 2024',
-        total_clicks: 189,
-        unique_clicks: 145,
-        last_clicked_at: '2024-08-27T09:15:00Z',
-        created_at: '2024-08-25T11:30:00Z',
-        is_active: true
-      },
-      {
-        id: '3',
-        original_url: 'https://blog.example.com/tutoriel-seo',
-        short_code: 'seo101',
-        full_short_url: 'https://clicktracker.app/seo101',
-        title: 'Tutoriel SEO pour débutants',
-        total_clicks: 78,
-        unique_clicks: 64,
-        last_clicked_at: '2024-08-26T15:45:00Z',
-        created_at: '2024-08-22T09:15:00Z',
-        is_active: true
-      }
-    ];
-
-    setTimeout(() => {
-      setStats(mockStats);
-      setLoading(false);
-    }, 500);
-  }, [links]);
-
-  const handleCopyLink = (shortUrl: string) => {
-    navigator.clipboard.writeText(shortUrl);
-    // TODO: Ajouter une notification toast
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const filteredLinks = links.filter(link =>
-    link.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    link.short_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    link.original_url.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (!user) {
-    return (
-      <div className="max-w-2xl mx-auto text-center py-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Connexion requise</h2>
-        <p className="text-gray-600">Veuillez vous connecter pour accéder à votre dashboard.</p>
-      </div>
-    );
+      if (error) throw error
+      setLinks(data || [])
+    } catch (error) {
+      console.error('Error fetching links:', error)
+    } finally {
+      setLoading(false)
+    }
   }
+
+  useEffect(() => {
+    if (user) {
+      fetchLinks()
+    }
+  }, [user])
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
-    );
+    )
   }
 
+  const totalClicks = links.reduce((sum, link) => sum + (link.click_count || 0), 0)
+
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                Bonjour, {user?.user_metadata?.full_name || user?.email?.split('@')[0]} 👋
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Voici un aperçu de vos performances aujourd'hui
-              </p>
+    <div className="min-h-screen bg-gray-50 w-full dashboard-container">
+      {/* Header Dashboard */}
+      <div className="bg-white border-b border-gray-200 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full content-centered">
+          <div className="flex items-center justify-between py-2">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 rounded-lg">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+                <p className="text-gray-600">Raccourcisseur de liens intelligent</p>
+              </div>
             </div>
-            <div className="mt-4 sm:mt-0 flex items-center space-x-3 mr-8 md:mr-16 lg:mr-20">
-              {hasReachedFreeLimit && (
-                <div className="hidden sm:flex items-center space-x-2 bg-orange-50 px-3 py-2 rounded-lg border border-orange-200">
-                  <Crown className="w-4 h-4 text-orange-600" />
-                  <span className="text-sm text-orange-800 font-medium">
-                    {remainingLinks} lien{remainingLinks > 1 ? 's' : ''} restant{remainingLinks > 1 ? 's' : ''}
-                  </span>
-                </div>
-              )}
-              <button 
-                onClick={handleCreateLink}
-                className={`px-6 py-3 rounded-lg font-semibold transition-colors flex items-center space-x-2 ${
-                  hasReachedFreeLimit
-                    ? 'bg-orange-600 hover:bg-orange-700 text-white'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+            
+            <div className="flex items-center space-x-4">
+              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                Plan Standard
+              </div>
+              <div className="text-sm text-gray-500">
+                {user?.email}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content with Sidebar */}
+      <div className="flex flex-col md:flex-row max-w-7xl mx-auto w-full content-centered overflow-safe">
+        {/* Desktop Sidebar Navigation */}
+        <div className="hidden md:block w-64 bg-white border-r border-gray-200 min-h-screen">
+          <div className="p-6">
+            <nav className="space-y-2">
+              <button
+                onClick={() => setActiveTab('links')}
+                className={`w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                  activeTab === 'links'
+                    ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
+                    : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                {hasReachedFreeLimit ? <Crown className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
-                <span>{hasReachedFreeLimit ? 'Passer au Premium' : 'Créer un lien'}</span>
+                <LinkIcon className="w-5 h-5" />
+                <span className="font-medium">Mes liens</span>
               </button>
-            </div>
+              
+              <div className="relative">
+                <button
+                  onClick={() => navigate('/pricing')}
+                  className="w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg text-gray-400 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <BarChart3 className="w-5 h-5" />
+                  <span className="font-medium">Analytics</span>
+                  <div className="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded">PRO</div>
+                </button>
+              </div>
+              
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`w-full flex items-center space-x-3 px-4 py-3 text-left rounded-lg transition-colors ${
+                  activeTab === 'settings'
+                    ? 'bg-blue-50 text-blue-600 border-l-4 border-blue-600'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Settings className="w-5 h-5" />
+                <span className="font-medium">Paramètres</span>
+              </button>
+            </nav>
           </div>
         </div>
-      </div>
 
-      {/* Bannière d'information pour utilisateurs gratuits */}
-      {!hasReachedFreeLimit && (
-        <div className="bg-blue-50 border-b border-blue-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="bg-blue-100 p-1 rounded">
-                  <Crown className="w-4 h-4 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-blue-900">
-                    Version gratuite - {remainingLinks} lien{remainingLinks > 1 ? 's' : ''} restant{remainingLinks > 1 ? 's' : ''}
-                  </p>
-                  <p className="text-xs text-blue-700">
-                    Créez des liens illimités avec le plan Premium
-                  </p>
-                </div>
-              </div>
+        {/* Mobile Navigation */}
+        <div className="md:hidden w-full bg-white border-b border-gray-200">
+          <div className="px-4 py-3 w-full">
+            <div className="flex space-x-1">
+              <button
+                onClick={() => setActiveTab('links')}
+                className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === 'links'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <LinkIcon className="w-4 h-4" />
+                <span>Liens</span>
+              </button>
+              
               <button
                 onClick={() => navigate('/pricing')}
-                className="text-sm font-medium text-blue-700 hover:text-blue-800 underline"
+                className="flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium rounded-md text-gray-400 hover:bg-gray-50 transition-colors cursor-pointer"
               >
-                Voir les tarifs
+                <BarChart3 className="w-4 h-4" />
+                <span>Analytics</span>
+                <div className="ml-1 bg-blue-500 text-white text-xs px-1 py-0.5 rounded">PRO</div>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`flex-1 flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === 'settings'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Settings className="w-4 h-4" />
+                <span>Paramètres</span>
               </button>
             </div>
           </div>
         </div>
-      )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total des liens</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.total_links}</p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <BarChart3 className="w-6 h-6 text-blue-600" />
-              </div>
+        {/* Main Content Area */}
+        <div className="flex-1 px-4 sm:px-6 lg:px-8 w-full max-w-full content-centered overflow-safe">
+        {activeTab === 'links' && (
+          <div className="w-full max-w-full content-centered overflow-safe">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Gestionnaire de liens</h2>
+              <p className="text-gray-600">
+                Plan standard : créez jusqu'à {limits.links} liens raccourcis avec le tracking de seulement {limits.clicks} lien. Passez au plan Pro pour plus de fonctionnalités.
+              </p>
             </div>
-            <p className="text-xs text-green-600 mt-2">+2 ce mois</p>
-          </div>
 
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total des clics</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.total_clicks.toLocaleString()}</p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-lg">
-                <TrendingUp className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-            <p className="text-xs text-green-600 mt-2">+12% vs la semaine dernière</p>
-          </div>
-
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Visiteurs uniques</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.unique_visitors.toLocaleString()}</p>
-              </div>
-              <div className="bg-purple-100 p-3 rounded-lg">
-                <Users className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-            <p className="text-xs text-green-600 mt-2">+8% vs la semaine dernière</p>
-          </div>
-
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pays actifs</p>
-                <p className="text-2xl font-bold text-gray-900">47</p>
-              </div>
-              <div className="bg-orange-100 p-3 rounded-lg">
-                <Globe className="w-6 h-6 text-orange-600" />
-              </div>
-            </div>
-            <p className="text-xs text-green-600 mt-2">+3 nouveaux pays</p>
-          </div>
-        </div>
-
-        {/* Analytics Chart & Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-8">
-          {/* Analytics Chart - Plus large */}
-          <div className="lg:col-span-3">
-            <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Clics (7 derniers jours)</h3>
-                <TrendingUp className="w-5 h-5 text-green-500" />
-              </div>
-              
-              {/* Chart plus grand */}
-              <div className="relative h-48 mb-4">
-                <svg viewBox="0 0 400 150" className="w-full h-full">
-                  <defs>
-                    <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: '#3B82F6', stopOpacity: 0.3 }} />
-                      <stop offset="100%" style={{ stopColor: '#3B82F6', stopOpacity: 0.05 }} />
-                    </linearGradient>
-                  </defs>
-                  
-                  {/* Chart area */}
-                  <path
-                    d="M 20 120 L 80 95 L 140 105 L 200 65 L 260 50 L 320 30 L 360 35 L 380 20"
-                    fill="none"
-                    stroke="#3B82F6"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  
-                  {/* Fill area */}
-                  <path
-                    d="M 20 120 L 80 95 L 140 105 L 200 65 L 260 50 L 320 30 L 360 35 L 380 20 L 380 140 L 20 140 Z"
-                    fill="url(#chartGradient)"
-                  />
-                  
-                  {/* Data points */}
-                  {[
-                    { x: 20, y: 120, value: 12 },
-                    { x: 80, y: 95, value: 18 },
-                    { x: 140, y: 105, value: 15 },
-                    { x: 200, y: 65, value: 28 },
-                    { x: 260, y: 50, value: 35 },
-                    { x: 320, y: 30, value: 45 },
-                    { x: 360, y: 35, value: 42 }
-                  ].map((point, index) => (
-                    <g key={index}>
-                      <circle
-                        cx={point.x}
-                        cy={point.y}
-                        r="5"
-                        fill="#3B82F6"
-                        className="hover:r-7 transition-all duration-200 cursor-pointer"
-                      />
-                      <circle
-                        cx={point.x}
-                        cy={point.y}
-                        r="10"
-                        fill="transparent"
-                        className="hover:fill-blue-100 transition-all duration-200 cursor-pointer"
-                      />
-                    </g>
-                  ))}
-                </svg>
-              </div>
-              
-              {/* Chart Legend */}
-              <div className="flex justify-between text-sm text-gray-500 mb-4">
-                <span>Lun</span>
-                <span>Mar</span>
-                <span>Mer</span>
-                <span>Jeu</span>
-                <span>Ven</span>
-                <span>Sam</span>
-                <span>Dim</span>
-              </div>
-              
-              {/* Summary Stats */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">195</div>
-                  <div className="text-sm text-gray-500">Total des clics</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">+23%</div>
-                  <div className="text-sm text-gray-500">vs semaine précédente</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Activity - Plus compact */}
-          <div className="lg:col-span-2">
-            <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Activité récente</h3>
-              <div className="space-y-4">
-                {[
-                  { link: 'summer24', country: 'France', time: '1 minute' },
-                  { link: 'mkt2024', country: 'Canada', time: '3 minutes' },
-                  { link: 'seo101', country: 'Belgique', time: '7 minutes' }
-                ].map((activity, index) => (
-                  <div key={index} className="flex items-center space-x-4">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-900">
-                        Nouveau clic sur <span className="font-medium">{activity.link}</span>
-                      </p>
-                      <p className="text-xs text-gray-500">{activity.country} • Il y a {activity.time}</p>
-                    </div>
-                    <span className="text-xs text-gray-400">10:3{index}</span>
+            {/* Stats rapides */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Liens créés</p>
+                    <p className="text-2xl font-bold text-gray-900">{links.length}</p>
+                    <p className="text-xs text-gray-500">sur {limits.links} maximum</p>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Links Table */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100">
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Mes liens</h3>
-              <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-0">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Rechercher..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+                  <LinkIcon className="w-8 h-8 text-blue-500" />
                 </div>
-                <select
-                  value={selectedPeriod}
-                  onChange={(e) => setSelectedPeriod(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="7d">7 derniers jours</option>
-                  <option value="30d">30 derniers jours</option>
-                  <option value="90d">90 derniers jours</option>
-                </select>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Clics totaux</p>
+                    <p className="text-2xl font-bold text-gray-900">{totalClicks}</p>
+                    <p className="text-xs text-gray-500">depuis le début</p>
+                  </div>
+                  <BarChart3 className="w-8 h-8 text-green-500" />
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Plan actuel</p>
+                    <p className="text-xl font-bold text-blue-600">Standard</p>
+                    <button 
+                      onClick={() => navigate('/pricing')}
+                      className="text-xs text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Passer au Pro
+                    </button>
+                  </div>
+                  <Zap className="w-8 h-8 text-yellow-500" />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Lien
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Clics
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Créé le
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Dernier clic
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredLinks.map((link) => (
-                  <tr key={link.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium text-gray-900">
-                            {link.title || 'Sans titre'}
-                          </span>
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            link.is_active 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {link.is_active ? 'Actif' : 'Inactif'}
-                          </span>
-                        </div>
-                        <div className="text-sm text-blue-600 mt-1 font-mono">
-                          {link.full_short_url}
-                        </div>
-                        <div className="text-xs text-gray-400 truncate max-w-xs">
-                          {link.original_url}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">
-                          {(link.total_clicks || 0).toLocaleString()}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {link.unique_clicks || 0} uniques
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {formatDate(link.created_at)}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {link.last_clicked_at ? formatDate(link.last_clicked_at) : 'Jamais'}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        <button
-                          onClick={() => handleCopyLink(link.full_short_url)}
-                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                          title="Copier le lien"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <LinkShortener />
           </div>
+        )}
 
-          {filteredLinks.length === 0 && (
+        {activeTab === 'analytics' && (
+          <div className="w-full max-w-full content-centered overflow-safe">
             <div className="text-center py-12">
-              <p className="text-gray-500">Aucun lien trouvé</p>
+              <BarChart3 className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Analytics disponibles en Pro</h3>
+              <p className="text-gray-600 mb-6">
+                Accédez à des analytics détaillés avec géolocalisation, types d'appareils et sources de trafic.
+              </p>
+              <button 
+                onClick={() => navigate('/pricing')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
+              >
+                Passer au plan Pro
+              </button>
             </div>
-          )}
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="w-full max-w-full content-centered overflow-safe">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Paramètres</h2>
+              <p className="text-gray-600">
+                Configurez vos préférences de base.
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-medium mb-4">Préférences</h3>
+              <button
+                onClick={() => setShowSettingsModal(true)} 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium"
+              >
+                Modifier mes paramètres
+              </button>
+            </div>
+          </div>
+        )}
         </div>
       </div>
 
-      {/* Modals */}
-      <CreateLinkModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onLinkCreated={handleLinkCreated}
-        hasReachedLimit={hasReachedLimit}
-        onUpgradeRequired={handleUpgradeRequired}
-        userTier={userTier}
+      {/* Modal de paramètres */}
+      <SettingsModal 
+        isOpen={showSettingsModal} 
+        onClose={() => setShowSettingsModal(false)} 
       />
-
-      {createdLink && (
-        <LinkSuccessModal
-          isOpen={showSuccessModal}
-          onClose={() => setShowSuccessModal(false)}
-          link={createdLink}
-        />
-      )}
     </div>
-  );
-};
+  )
+}

@@ -78,7 +78,12 @@ export function useSubscription() {
 
   const getLimits = () => {
     if (!profile) {
-      return { links: 5, clicks: 1000, domains: 0 }
+      return { links: 1, clicks: 10000, domains: 1 }
+    }
+
+    // Plan gratuit : seulement 1 lien et 10000 clics
+    if (!profile.subscription_tier || profile.subscription_tier === 'free') {
+      return { links: 1, clicks: 10000, domains: 1 }
     }
 
     return {
@@ -86,6 +91,18 @@ export function useSubscription() {
       clicks: profile.monthly_clicks_limit,
       domains: profile.custom_domains_limit
     }
+  }
+
+  const canEnableTracking = (currentTrackedLinks: number) => {
+    const limits = getLimits()
+    return currentTrackedLinks < limits.clicks
+  }
+
+  const getTrackingLimitsMessage = () => {
+    if (!profile?.subscription_tier || profile.subscription_tier === 'free') {
+      return "Plan gratuit : seulement 1 lien peut avoir le tracking activé"
+    }
+    return "Tracking illimité disponible"
   }
 
   return {
@@ -97,6 +114,8 @@ export function useSubscription() {
     isBusiness,
     isAdvanced,
     getLimits,
+    canEnableTracking,
+    getTrackingLimitsMessage,
     refetch: fetchUserProfile
   }
 }

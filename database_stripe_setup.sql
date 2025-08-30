@@ -21,7 +21,7 @@ ON public.user_profiles(stripe_subscription_id);
 -- Mise à jour des limites pour les plans gratuits (cohérent avec la fonction)
 UPDATE public.user_profiles 
 SET monthly_link_limit = 1, monthly_clicks_limit = 10000, custom_domains_limit = 1 
-WHERE subscription_tier = 'free';
+WHERE subscription_tier = 'free' OR subscription_tier IS NULL;
 
 -- Table pour stocker les événements Stripe (audit trail)
 CREATE TABLE IF NOT EXISTS public.stripe_events (

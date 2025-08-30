@@ -1,18 +1,33 @@
 import React, { useState } from 'react';
-import { Link, Copy, Check, Zap, BarChart, Globe } from 'lucide-react';
+import { Link, Copy, Check, Zap, BarChart, Globe, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useSubscription } from '../../hooks/useSubscription';
+import { useTrackedLinksCount } from '../../hooks/useTrackedLinksCount';
 import { supabase } from '../../lib/supabase';
 
 export const LinkShortener: React.FC = () => {
   const { user } = useAuth();
+  const { canEnableTracking, getLimits, getTrackingLimitsMessage } = useSubscription();
+  const { trackedLinksCount, refetch: refetchTrackedCount } = useTrackedLinksCount(user?.id);
   
   // États pour le formulaire
   const [url, setUrl] = useState('');
   const [customAlias, setCustomAlias] = useState('');
+  const [enableTracking, setEnableTracking] = useState(false); // Commencer désactivé par défaut
   const [shortUrl, setShortUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
+
+  const limits = getLimits();
+  const canTrack = canEnableTracking(trackedLinksCount);
+  
+  // Activer automatiquement le tracking si possible
+  React.useEffect(() => {
+    if (canTrack && !enableTracking) {
+      setEnableTracking(true);
+    }
+  }, [canTrack, enableTracking]);
 
   const generateShortCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -65,6 +80,9 @@ export const LinkShortener: React.FC = () => {
         }
       }
 
+      // Déterminer si le tracking doit être activé
+      const shouldEnableTracking = enableTracking && canTrack;
+
       // Créer le lien dans Supabase
       const { data: newLink, error: createError } = await supabase
         .from('links')
@@ -72,7 +90,8 @@ export const LinkShortener: React.FC = () => {
           user_id: user.id,
           original_url: normalizedUrl,
           short_code: shortCode,
-          is_active: true
+          is_active: true,
+          tracking_enabled: shouldEnableTracking
         })
         .select('*')
         .single();
@@ -93,6 +112,12 @@ export const LinkShortener: React.FC = () => {
       setShortUrl(fullShortUrl);
       setUrl('');
       setCustomAlias('');
+      setEnableTracking(true);
+      
+      // Actualiser le compteur de liens avec tracking si le tracking était activé
+      if (shouldEnableTracking) {
+        refetchTrackedCount();
+      }
       
     } catch (err) {
       console.error('Erreur dans handleSubmit:', err);
@@ -162,6 +187,36 @@ export const LinkShortener: React.FC = () => {
                 pattern="[a-zA-Z0-9-_]+"
                 title="Seuls les lettres, chiffres, tirets et underscores sont autorisés"
               />
+            </div>
+          </div>
+
+          {/* Contrôle du tracking */}
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-start space-x-3">
+              <input
+                type="checkbox"
+                id="enableTracking"
+                checked={enableTracking}
+                onChange={(e) => setEnableTracking(e.target.checked)}
+                disabled={!canTrack && enableTracking}
+                className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <div className="flex-1">
+                <label htmlFor="enableTracking" className="text-sm font-medium text-gray-700">
+                  Activer le tracking et les analytics
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  {canTrack 
+                    ? `Vous pouvez tracker ${limits.clicks - trackedLinksCount} lien(s) supplémentaire(s)`
+                    : `Limite atteinte : ${limits.clicks} lien(s) avec tracking maximum (plan gratuit)`
+                  }
+                </p>
+                {!canTrack && (
+                  <p className="text-xs text-orange-600 mt-1">
+                    Désactivez le tracking sur un autre lien ou passez au plan Pro pour plus de limites.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
