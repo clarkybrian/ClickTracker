@@ -155,7 +155,7 @@ export default function DashboardBusiness() {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50">
       {/* Header Business */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-emerald-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="bg-gradient-to-r from-emerald-500 to-blue-500 p-3 rounded-2xl">
@@ -181,7 +181,7 @@ export default function DashboardBusiness() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <div className="bg-white/90 backdrop-blur-sm rounded-xl p-6 border border-emerald-200 shadow-sm">

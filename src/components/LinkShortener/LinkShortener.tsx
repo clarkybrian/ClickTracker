@@ -1,40 +1,21 @@
 import React, { useState } from 'react';
-import { Link, Copy, Check, Zap, BarChart, Globe, Plus } from 'lucide-react';
-import { CreateLinkModal } from './CreateLinkModal';
+import { Link, Copy, Check, Zap, BarChart, Globe } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { useSubscription } from '../../hooks/useSubscription';
-import { useLinks } from '../../hooks/useLinks';
-import { Link as LinkType } from '../../types';
+import { supabase } from '../../lib/supabase';
 
 export const LinkShortener: React.FC = () => {
   const { user } = useAuth();
-  const { tier } = useSubscription();
-  const { links, hasReachedFreeLimit } = useLinks(user?.id);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  
+  // États pour le formulaire
+  const [url, setUrl] = useState('');
+  const [customAlias, setCustomAlias] = useState('');
+  const [shortUrl, setShortUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
 
-  const handleLinkCreated = (newLink: LinkType) => {
-    console.log('Nouveau lien créé:', newLink);
-    // Le hook useLinks se mettra à jour automatiquement
-  };
-
-  const handleUpgradeRequired = () => {
-    // Redirection vers la page pricing
-    window.location.href = '/pricing';
-  };
-
-  const copyToClipboard = async (text: string, linkId: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(linkId);
-      setTimeout(() => setCopied(null), 2000);
-    } catch (err) {
-      console.error('Erreur lors de la copie:', err);
-    }
-  };
-
-  const generateShortCode = (): string => {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const generateShortCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     for (let i = 0; i < 6; i++) {
       result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -44,51 +25,77 @@ export const LinkShortener: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) {
+      setError('Vous devez être connecté pour raccourcir un lien');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
+      console.log('LinkShortener - Début de la création du lien');
+      console.log('URL:', url);
+      console.log('Custom alias:', customAlias);
+      console.log('User ID:', user?.id);
+      
       // Validate URL
       const urlPattern = /^https?:\/\/.+/;
       if (!urlPattern.test(url)) {
         throw new Error('Veuillez entrer une URL valide commençant par http:// ou https://');
       }
 
-      // Generate short code
+      // Normaliser l'URL
+      const normalizedUrl = url.trim();
       const shortCode = customAlias || generateShortCode();
-      
-      // Check if custom alias already exists
+
+      // Vérifier que l'alias n'existe pas déjà (si fourni)
       if (customAlias) {
-        const { data: existing } = await supabase
+        const { data: existingLink } = await supabase
           .from('links')
           .select('id')
-          .eq('short_code', customAlias)
+          .eq('short_code', shortCode)
           .single();
 
-        if (existing) {
-          throw new Error('Cet alias personnalisé est déjà pris. Veuillez en choisir un autre.');
+        if (existingLink) {
+          setError('Cet alias est déjà utilisé');
+          setLoading(false);
+          return;
         }
       }
 
-      // Save to database
-      const { error: dbError } = await supabase
+      // Créer le lien dans Supabase
+      const { data: newLink, error: createError } = await supabase
         .from('links')
-        .insert([
-          {
-            original_url: url,
-            short_code: shortCode,
-            user_id: null, // For now, we'll allow anonymous links
-          }
-        ])
-        .select()
+        .insert({
+          user_id: user.id,
+          original_url: normalizedUrl,
+          short_code: shortCode,
+          is_active: true
+        })
+        .select('*')
         .single();
 
-      if (dbError) throw dbError;
+      if (createError) {
+        console.error('Erreur Supabase:', createError);
+        throw new Error('Erreur lors de la création du lien: ' + createError.message);
+      }
 
-      setShortUrl(`https://clt.kr/${shortCode}`);
+      if (!newLink) {
+        throw new Error('Aucun lien créé');
+      }
+
+      // Construire l'URL complète
+      const fullShortUrl = `${window.location.origin}/r/${shortCode}`;
+      
+      console.log('Lien créé avec succès:', fullShortUrl);
+      setShortUrl(fullShortUrl);
       setUrl('');
       setCustomAlias('');
+      
     } catch (err) {
+      console.error('Erreur dans handleSubmit:', err);
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {
       setLoading(false);
@@ -98,8 +105,8 @@ export const LinkShortener: React.FC = () => {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(shortUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopied('link-copied');
+      setTimeout(() => setCopied(null), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
     }

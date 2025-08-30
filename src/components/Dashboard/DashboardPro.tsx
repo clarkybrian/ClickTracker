@@ -153,7 +153,7 @@ export default function DashboardPro() {
       {/* Header Pro */}
       <div className="bg-white border-b border-gray-200 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full content-centered">
-          <div className="flex items-center justify-between py-6">
+          <div className="flex items-center justify-between py-2">
             <div className="flex items-center space-x-4">
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-lg">
                 <BarChart3 className="w-6 h-6 text-white" />
@@ -265,7 +265,7 @@ export default function DashboardPro() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8 w-full max-w-full content-centered overflow-safe">
+        <div className="flex-1 px-4 sm:px-6 lg:px-8 w-full max-w-full content-centered overflow-safe">
         {activeTab === 'links' && (
           <div className="w-full max-w-full content-centered overflow-safe">
             <div className="mb-6">

@@ -777,33 +777,28 @@ body.mobile-menu-open {
   transition: padding-top 0.3s ease-in-out; /* Animation fluide */
 }
 
-/* Quand le header est visible, ajouter le padding */
-body.header-visible .ck-main {
-  padding-top: 80px;
+/* Ajustement pour toutes les pages avec header fixe */
+.ck-main {
+  padding-top: 80px; /* Espace pour le header fixe */
 }
 
-/* Style spécifique pour les pages Dashboard - Override complet */
+/* Style spécifique pour les pages Dashboard - Header fixe permanent */
 .dashboard-page {
   position: absolute;
-  top: 0;
+  top: 80px; /* Position fixe sous le header permanent */
   left: 0;
   right: 0;
-  min-height: 100vh;
-  transition: top 0.3s ease-in-out;
+  min-height: calc(100vh - 80px);
 }
 
-body.header-visible .dashboard-page {
-  top: 80px; /* Descend de la hauteur du header quand il est visible */
+/* Éliminer les paddings internes du Dashboard */
+.dashboard-page .max-w-7xl {
+  padding-top: 0 !important;
 }
 
-/* Ajustement de l'indicateur Realtime pour coller en haut */
+/* Ajustement de l'indicateur Realtime */
 .dashboard-page .fixed.top-20 {
-  top: 1rem; /* Par défaut, colle tout en haut */
-  transition: top 0.3s ease-in-out;
-}
-
-body.header-visible .dashboard-page .fixed.top-20 {
-  top: 6rem; /* Descend quand le header est visible */
+  top: 6rem; /* Position sous le header fixe */
 }
 
 .ck-footer {
