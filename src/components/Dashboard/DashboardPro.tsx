@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import SettingsModal from './SettingsModal'
 import { LinkShortenerPro } from '../../components/LinkShortener/LinkShortenerPro'
-import { ClickAnalytics } from '../../components/Analytics/ClickAnalytics'
+import { RealTimeAnalytics } from '../../components/Analytics/RealTimeAnalytics'
 import { 
   Plus,
   Settings,
@@ -281,14 +281,10 @@ export default function DashboardPro() {
 
         {activeTab === 'analytics' && (
           <div>
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Analytics Pro</h2>
-              <p className="text-gray-600">
-                Analysez les performances de vos liens avec des statistiques détaillées : 
-                géolocalisation, types d'appareils, navigateurs, et bien plus.
-              </p>
-            </div>
-            <ClickAnalytics userId={user?.id || ''} />
+            <RealTimeAnalytics 
+              userId={user?.id || ''} 
+              linkId={selectedLink?.id}
+            />
           </div>
         )}
 

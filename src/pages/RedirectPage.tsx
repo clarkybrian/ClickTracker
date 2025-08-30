@@ -37,17 +37,69 @@ export const RedirectPage: React.FC = () => {
         
         // Détecter le navigateur
         let browser = 'Unknown';
-        if (userAgent.includes('Chrome')) browser = 'Chrome';
-        else if (userAgent.includes('Firefox')) browser = 'Firefox';
-        else if (userAgent.includes('Safari')) browser = 'Safari';
-        else if (userAgent.includes('Edge')) browser = 'Edge';
+        if (userAgent.includes('Edg/')) browser = 'Microsoft Edge';
+        else if (userAgent.includes('Chrome') && !userAgent.includes('Edg/')) browser = 'Google Chrome';
+        else if (userAgent.includes('Firefox')) browser = 'Mozilla Firefox';
+        else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) browser = 'Safari';
+        else if (userAgent.includes('Opera')) browser = 'Opera';
+        else if (userAgent.includes('Brave')) browser = 'Brave';
+
+        // Détecter l'OS
+        let osName = 'Unknown';
+        let osVersion = null;
+        
+        if (userAgent.includes('Windows NT 10.0')) {
+          osName = 'Windows 10';
+          osVersion = '10.0';
+        } else if (userAgent.includes('Windows NT 6.3')) {
+          osName = 'Windows 8.1';
+          osVersion = '8.1';
+        } else if (userAgent.includes('Windows NT 6.2')) {
+          osName = 'Windows 8';
+          osVersion = '8.0';
+        } else if (userAgent.includes('Windows NT 6.1')) {
+          osName = 'Windows 7';
+          osVersion = '7.0';
+        } else if (userAgent.includes('Windows')) {
+          osName = 'Windows';
+        } else if (userAgent.includes('Mac OS X')) {
+          osName = 'macOS';
+          const macMatch = userAgent.match(/Mac OS X ([\d_]+)/);
+          if (macMatch) {
+            osVersion = macMatch[1].replace(/_/g, '.');
+          }
+        } else if (userAgent.includes('iPhone')) {
+          osName = 'iOS';
+          const iosMatch = userAgent.match(/OS ([\d_]+)/);
+          if (iosMatch) {
+            osVersion = iosMatch[1].replace(/_/g, '.');
+          }
+        } else if (userAgent.includes('iPad')) {
+          osName = 'iPadOS';
+          const iosMatch = userAgent.match(/OS ([\d_]+)/);
+          if (iosMatch) {
+            osVersion = iosMatch[1].replace(/_/g, '.');
+          }
+        } else if (userAgent.includes('Android')) {
+          osName = 'Android';
+          const androidMatch = userAgent.match(/Android ([\d.]+)/);
+          if (androidMatch) {
+            osVersion = androidMatch[1];
+          }
+        } else if (userAgent.includes('Linux')) {
+          osName = 'Linux';
+        } else if (userAgent.includes('Ubuntu')) {
+          osName = 'Ubuntu';
+        } else if (userAgent.includes('CrOS')) {
+          osName = 'Chrome OS';
+        }
 
         // Détecter le type d'appareil
-        let device = 'Desktop';
-        if (/Mobile|Android|iPhone|iPad/.test(userAgent)) {
-          device = 'Mobile';
+        let device = 'desktop';
+        if (/Mobile|Android|iPhone/.test(userAgent)) {
+          device = 'mobile';
         } else if (/Tablet|iPad/.test(userAgent)) {
-          device = 'Tablet';
+          device = 'tablet';
         }
 
         // Obtenir l'IP et la géolocalisation (via une API externe)
@@ -60,6 +112,7 @@ export const RedirectPage: React.FC = () => {
           longitude: null,
           timezone: null
         };
+        let userIp = null;
 
         try {
           const ipResponse = await fetch('https://ipapi.co/json/');
@@ -73,17 +126,34 @@ export const RedirectPage: React.FC = () => {
             longitude: ipData.longitude || null,
             timezone: ipData.timezone || null
           };
+          userIp = ipData.ip || null; // Récupérer l'IP
         } catch (err) {
           console.warn('Impossible de récupérer la géolocalisation:', err);
         }
 
-        // Générer un session_id unique pour ce clic
-        const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        // Générer ou récupérer un session_id persistant pour ce visiteur
+        let sessionId = localStorage.getItem('clicktracker_session_id');
+        if (!sessionId) {
+          sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          localStorage.setItem('clicktracker_session_id', sessionId);
+          // Expire après 30 minutes d'inactivité
+          localStorage.setItem('clicktracker_session_expires', (Date.now() + 30 * 60 * 1000).toString());
+        } else {
+          // Vérifier si la session a expiré
+          const expiresTime = parseInt(localStorage.getItem('clicktracker_session_expires') || '0');
+          if (Date.now() > expiresTime) {
+            // Session expirée, en créer une nouvelle
+            sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            localStorage.setItem('clicktracker_session_id', sessionId);
+          }
+          // Étendre l'expiration de 30 minutes
+          localStorage.setItem('clicktracker_session_expires', (Date.now() + 30 * 60 * 1000).toString());
+        }
 
         // Enregistrer le clic avec la structure complète de votre BD
         const clickData = {
           link_id: link.id,
-          ip_address: null, // Sera automatiquement détecté côté serveur dans un vrai déploiement
+          ip_address: userIp, // IP récupérée via l'API
           user_agent: userAgent,
           referer: referrer,
           
@@ -98,10 +168,10 @@ export const RedirectPage: React.FC = () => {
           
           // Informations appareil/navigateur
           browser_name: browser,
-          browser_version: null, // Peut être extrait avec une lib dédiée
-          os_name: null, // Peut être extrait du user agent
-          os_version: null,
-          device_type: device.toLowerCase(),
+          browser_version: null, // Peut être extrait plus tard si besoin
+          os_name: osName,
+          os_version: osVersion,
+          device_type: device,
           device_brand: null,
           device_model: null,
           
