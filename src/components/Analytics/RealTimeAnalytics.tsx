@@ -634,9 +634,9 @@ interface CustomTooltipProps {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full content-centered overflow-safe">
       {/* En-tête avec contrôles */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Analytics Pro</h2>
           <p className="text-gray-600">

@@ -149,10 +149,10 @@ export default function DashboardPro() {
   const trafficStats = analytics?.traffic || []
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 w-full dashboard-container">
       {/* Header Pro */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="bg-white border-b border-gray-200 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full content-centered">
           <div className="flex items-center justify-between py-6">
             <div className="flex items-center space-x-4">
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-lg">
@@ -177,7 +177,7 @@ export default function DashboardPro() {
       </div>
 
       {/* Main Content with Sidebar */}
-      <div className="flex flex-col md:flex-row max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row max-w-7xl mx-auto w-full content-centered overflow-safe">
         {/* Desktop Sidebar Navigation */}
         <div className="hidden md:block w-64 bg-white border-r border-gray-200 min-h-screen">
           <div className="p-6">
@@ -223,7 +223,7 @@ export default function DashboardPro() {
 
         {/* Mobile Navigation */}
         <div className="md:hidden w-full bg-white border-b border-gray-200">
-          <div className="px-4 py-3">
+          <div className="px-4 py-3 w-full">
             <div className="flex space-x-1">
               <button
                 onClick={() => setActiveTab('links')}
@@ -265,9 +265,9 @@ export default function DashboardPro() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8 w-full max-w-full content-centered overflow-safe">
         {activeTab === 'links' && (
-          <div>
+          <div className="w-full max-w-full content-centered overflow-safe">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Gestionnaire de liens Pro</h2>
               <p className="text-gray-600">
@@ -280,7 +280,7 @@ export default function DashboardPro() {
         )}
 
         {activeTab === 'analytics' && (
-          <div>
+          <div className="w-full max-w-full content-centered overflow-safe">
             <RealTimeAnalytics 
               userId={user?.id || ''} 
               linkId={selectedLink?.id}
@@ -289,7 +289,7 @@ export default function DashboardPro() {
         )}
 
         {activeTab === 'settings' && (
-          <div>
+          <div className="w-full max-w-full content-centered overflow-safe">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Paramètres</h2>
               <p className="text-gray-600">
