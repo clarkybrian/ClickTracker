@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, BarChart3, Globe, Zap, TrendingUp, Crown, Check, X } from 'lucide-react';
+import { ArrowRight, BarChart3, Globe, Zap, TrendingUp, Crown, Check } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 // Stats qui défilent
@@ -374,7 +374,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         {/* Contenu principal avec Z-index plus élevé */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
           {/* Stats carousel en haut */}
           <div className="mb-12">
             <div className="inline-flex items-center space-x-4 bg-gray-50 rounded-2xl p-4 backdrop-blur-sm">

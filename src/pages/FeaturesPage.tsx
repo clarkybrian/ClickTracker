@@ -71,7 +71,7 @@ export const FeaturesPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 py-12 md:py-20">
+      <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 pt-20 pb-12 md:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6">
             Fonctionnalités

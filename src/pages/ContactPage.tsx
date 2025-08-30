@@ -67,7 +67,7 @@ export const ContactPage: React.FC = () => {
   return (
     <div className="ck-contact-page min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="ck-contact-hero bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 py-12 md:py-20">
+      <div className="ck-contact-hero bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 pt-20 pb-12 md:pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex items-center justify-center space-x-3 mb-4 md:mb-6">
             <div className="p-2 md:p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl md:rounded-2xl">
