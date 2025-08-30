@@ -48,6 +48,39 @@
 }
 
 /* Animation pour le carrousel infini */
+@keyframes carousel-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Styles pour le carousel 3D */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.animate-carousel-infinite {
+  animation: carousel-infinite 20s linear infinite;
+}
+
+/* Effets 3D pour les cartes */
+.carousel-card {
+  transform-style: preserve-3d;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.carousel-card:hover {
+  transform: translateY(-10px) rotateY(5deg) scale(1.05);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
 @keyframes scroll-infinite {
   0% {
     transform: translateX(0);

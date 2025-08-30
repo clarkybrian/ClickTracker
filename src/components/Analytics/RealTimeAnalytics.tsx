@@ -8,9 +8,6 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
-  PieChart,
-  Pie,
-  Cell,
   BarChart,
   Bar
 } from 'recharts';
@@ -24,11 +21,6 @@ import {
   Pause,
   Globe,
   Monitor,
-  Smartphone,
-  Tablet,
-  Chrome,
-  Firefox,
-  Safari,
   Clock
 } from 'lucide-react';
 
@@ -75,6 +67,13 @@ interface DetailedStats {
   cities: { name: string; country: string; count: number; percentage: number }[];
 }
 
+interface AnalyticsCardItem {
+  name: string;
+  emoji: string;
+  count: number;
+  percentage: number;
+}
+
 type TimeInterval = '15m' | '1h' | '24h' | '7d' | '30d' | '1y';
 
 const TIME_INTERVALS = [
@@ -98,6 +97,8 @@ export const RealTimeAnalytics: React.FC<RealTimeAnalyticsProps> = ({
   const [uniqueVisitors, setUniqueVisitors] = useState(0);
   const [conversionRate, setConversionRate] = useState(0);
   const [countries, setCountries] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isCarouselPaused, setIsCarouselPaused] = useState(false);
   const [detailedStats, setDetailedStats] = useState<DetailedStats>({
     countries: [],
     devices: [],
@@ -110,6 +111,99 @@ export const RealTimeAnalytics: React.FC<RealTimeAnalyticsProps> = ({
   
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastUpdateRef = useRef<Date>(new Date());
+
+  // Structure des cartes analytics pour le carousel 3D
+  const analyticsCards = [
+    {
+      title: 'Pays',
+      icon: <Globe className="h-5 w-5 text-blue-600" />,
+      bgColor: 'bg-blue-100',
+      data: detailedStats.countries.map(country => ({
+        name: country.name,
+        emoji: country.code ? '🇺🇳' : '🌍',
+        count: country.count,
+        percentage: country.percentage
+      }))
+    },
+    {
+      title: 'Villes',
+      icon: <Globe className="h-5 w-5 text-green-600" />,
+      bgColor: 'bg-green-100',
+      data: detailedStats.cities.map(city => ({
+        name: `${city.name} (${city.country})`,
+        emoji: '🏙️',
+        count: city.count,
+        percentage: city.percentage
+      }))
+    },
+    {
+      title: 'Appareils',
+      icon: <Monitor className="h-5 w-5 text-purple-600" />,
+      bgColor: 'bg-purple-100',
+      data: detailedStats.devices.map(device => ({
+        name: device.name,
+        emoji: device.name === 'Mobile' ? '📱' : 
+               device.name === 'Ordinateur' ? '💻' : 
+               device.name === 'Tablette' ? '📱' : '🖥️',
+        count: device.count,
+        percentage: device.percentage
+      }))
+    },
+    {
+      title: 'Navigateurs',
+      icon: <Globe className="h-5 w-5 text-orange-600" />,
+      bgColor: 'bg-orange-100',
+      data: detailedStats.browsers.map(browser => ({
+        name: browser.name,
+        emoji: browser.name.toLowerCase().includes('chrome') ? '🟢' :
+               browser.name.toLowerCase().includes('firefox') ? '🟠' :
+               browser.name.toLowerCase().includes('safari') ? '🔵' :
+               browser.name.toLowerCase().includes('edge') ? '🟣' : '🌐',
+        count: browser.count,
+        percentage: browser.percentage
+      }))
+    },
+    {
+      title: 'Systèmes d\'exploitation',
+      icon: <Monitor className="h-5 w-5 text-indigo-600" />,
+      bgColor: 'bg-indigo-100',
+      data: detailedStats.os.map(os => ({
+        name: os.name,
+        emoji: os.name.toLowerCase().includes('windows') ? '🪟' :
+               os.name.toLowerCase().includes('mac') ? '🍎' :
+               os.name.toLowerCase().includes('linux') ? '🐧' :
+               os.name.toLowerCase().includes('android') ? '🤖' :
+               os.name.toLowerCase().includes('ios') ? '📱' : '💻',
+        count: os.count,
+        percentage: os.percentage
+      }))
+    },
+    {
+      title: 'Sources de trafic',
+      icon: <TrendingUp className="h-5 w-5 text-pink-600" />,
+      bgColor: 'bg-pink-100',
+      data: detailedStats.referrers.map(referrer => ({
+        name: referrer.name,
+        emoji: referrer.name === 'Direct' ? '🔗' :
+               referrer.name.includes('google') ? '🔍' :
+               referrer.name.includes('facebook') ? '📘' :
+               referrer.name.includes('twitter') ? '🐦' :
+               referrer.name.includes('instagram') ? '📷' : '🌐',
+        count: referrer.count,
+        percentage: referrer.percentage
+      }))
+    }
+  ];
+
+  // Effet pour le carousel automatique
+  useEffect(() => {
+    if (!isCarouselPaused && analyticsCards.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentSlide(prev => (prev + 1) % analyticsCards.length);
+      }, 3000); // Change de slide toutes les 3 secondes
+      return () => clearInterval(interval);
+    }
+  }, [isCarouselPaused, analyticsCards.length]);
 
   const getTimeStep = (interval: TimeInterval): number => {
     switch (interval) {
@@ -693,176 +787,87 @@ interface CustomTooltipProps {
         )}
       </div>
 
-      {/* Statistiques détaillées */}
+      {/* Statistiques détaillées - Carousel 3D */}
       {!loading && totalClicks > 0 && (
-        <div className="mt-8 space-y-6">
-          {/* Pays et villes */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Pays */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center mb-4">
-                <Globe className="h-5 w-5 text-blue-600 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900">Pays</h3>
-              </div>
-              <div className="space-y-3">
-                {detailedStats.countries.slice(0, 8).map((country) => (
-                  <div key={country.name} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">{country.code ? `🇺🇳` : '🌍'}</span>
-                      <span className="text-sm font-medium text-gray-900">{country.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">{country.count}</span>
-                      <span className="text-xs text-gray-500">({country.percentage.toFixed(1)}%)</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Villes */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center mb-4">
-                <Globe className="h-5 w-5 text-green-600 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900">Villes</h3>
-              </div>
-              <div className="space-y-3">
-                {detailedStats.cities.slice(0, 8).map((city) => (
-                  <div key={`${city.name}-${city.country}`} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">🏙️</span>
-                      <div>
-                        <span className="text-sm font-medium text-gray-900">{city.name}</span>
-                        <span className="text-xs text-gray-500 ml-1">({city.country})</span>
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Analyses détaillées</h3>
+          
+          <div 
+            className="relative h-80 perspective-1000 overflow-hidden"
+            onMouseEnter={() => setIsCarouselPaused(true)}
+            onMouseLeave={() => setIsCarouselPaused(false)}
+          >
+            <div 
+              className={`flex transition-transform duration-1000 ease-in-out ${
+                isCarouselPaused ? '' : 'animate-carousel-infinite'
+              }`}
+              style={{
+                transform: `translateX(${currentSlide * -320}px)`,
+                width: `${analyticsCards.length * 320}px`
+              }}
+            >
+              {analyticsCards.map((card, index) => (
+                <div
+                  key={index}
+                  className="w-80 h-72 mx-2 flex-shrink-0 transform transition-all duration-500 hover:scale-105"
+                  style={{
+                    transform: `rotateY(${Math.sin((index - currentSlide) * 0.1) * 10}deg) 
+                               translateZ(${Math.abs(index - currentSlide) * -20}px)`,
+                    opacity: Math.abs(index - currentSlide) > 2 ? 0.3 : 1
+                  }}
+                >
+                  <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 h-full carousel-card">
+                    <div className="flex items-center mb-4">
+                      <div className={`p-2 rounded-lg ${card.bgColor} mr-3`}>
+                        {card.icon}
                       </div>
+                      <h4 className="text-lg font-semibold text-gray-900">{card.title}</h4>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">{city.count}</span>
-                      <span className="text-xs text-gray-500">({city.percentage.toFixed(1)}%)</span>
+                    <div className="space-y-2 overflow-y-auto max-h-44">
+                      {card.data.slice(0, 6).map((item: AnalyticsCardItem, itemIndex: number) => (
+                        <div key={itemIndex} className="flex items-center justify-between py-1">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-lg">{item.emoji}</span>
+                            <span className="text-sm font-medium text-gray-900 truncate max-w-32">
+                              {item.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <span className="text-sm text-gray-600">{item.count}</span>
+                            <span className="text-xs text-gray-500">
+                              ({item.percentage.toFixed(1)}%)
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
-
-          {/* Appareils et navigateurs */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Appareils */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center mb-4">
-                <Monitor className="h-5 w-5 text-purple-600 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900">Appareils</h3>
-              </div>
-              <div className="space-y-3">
-                {detailedStats.devices.map((device) => (
-                  <div key={device.name} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">
-                        {device.name === 'Mobile' ? '📱' : 
-                         device.name === 'Ordinateur' ? '💻' : 
-                         device.name === 'Tablette' ? '📱' : '🖥️'}
-                      </span>
-                      <span className="text-sm font-medium text-gray-900">{device.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">{device.count}</span>
-                      <span className="text-xs text-gray-500">({device.percentage.toFixed(1)}%)</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Navigateurs */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center mb-4">
-                <Globe className="h-5 w-5 text-orange-600 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900">Navigateurs</h3>
-              </div>
-              <div className="space-y-3">
-                {detailedStats.browsers.map((browser) => (
-                  <div key={browser.name} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">
-                        {browser.name.toLowerCase().includes('chrome') ? '🟢' :
-                         browser.name.toLowerCase().includes('firefox') ? '🟠' :
-                         browser.name.toLowerCase().includes('safari') ? '🔵' :
-                         browser.name.toLowerCase().includes('edge') ? '🟣' : '🌐'}
-                      </span>
-                      <span className="text-sm font-medium text-gray-900">{browser.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">{browser.count}</span>
-                      <span className="text-xs text-gray-500">({browser.percentage.toFixed(1)}%)</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* OS et Referrers */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Systèmes d'exploitation */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center mb-4">
-                <Monitor className="h-5 w-5 text-indigo-600 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900">Systèmes d'exploitation</h3>
-              </div>
-              <div className="space-y-3">
-                {detailedStats.os.map((os) => (
-                  <div key={os.name} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">
-                        {os.name.toLowerCase().includes('windows') ? '🪟' :
-                         os.name.toLowerCase().includes('mac') ? '🍎' :
-                         os.name.toLowerCase().includes('linux') ? '🐧' :
-                         os.name.toLowerCase().includes('android') ? '🤖' :
-                         os.name.toLowerCase().includes('ios') ? '📱' : '💻'}
-                      </span>
-                      <span className="text-sm font-medium text-gray-900">{os.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">{os.count}</span>
-                      <span className="text-xs text-gray-500">({os.percentage.toFixed(1)}%)</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Sources de trafic */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center mb-4">
-                <TrendingUp className="h-5 w-5 text-pink-600 mr-2" />
-                <h3 className="text-lg font-semibold text-gray-900">Sources de trafic</h3>
-              </div>
-              <div className="space-y-3">
-                {detailedStats.referrers.map((referrer) => (
-                  <div key={referrer.name} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">
-                        {referrer.name === 'Direct' ? '🔗' :
-                         referrer.name.includes('google') ? '🔍' :
-                         referrer.name.includes('facebook') ? '📘' :
-                         referrer.name.includes('twitter') ? '🐦' :
-                         referrer.name.includes('instagram') ? '📷' : '🌐'}
-                      </span>
-                      <span className="text-sm font-medium text-gray-900">{referrer.name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">{referrer.count}</span>
-                      <span className="text-xs text-gray-500">({referrer.percentage.toFixed(1)}%)</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          
+          {/* Légende du carousel */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Navigation :</span> Le carousel défile automatiquement. 
+              Survolez pour arrêter le défilement.
+            </p>
+            <div className="flex justify-center mt-2 space-x-2">
+              {analyticsCards.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    index === currentSlide ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
             </div>
           </div>
 
           {/* Distribution horaire */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
             <div className="flex items-center mb-4">
               <Clock className="h-5 w-5 text-cyan-600 mr-2" />
               <h3 className="text-lg font-semibold text-gray-900">Distribution horaire</h3>
